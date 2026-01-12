@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import io from 'socket.io-client';
@@ -17,14 +17,19 @@ import LiveVideoFeed from './components/LiveVideoFeed';
 import LostFound from './components/LostFound';
 import MedicalEmergency from './components/MedicalEmergency';
 import Weather from './components/Weather';
+import KumbhInfo from './components/KumbhInfo';
+import Login from './components/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 import Footer from './components/Footer';
 
 // Context
 import { SocketContext } from './context/SocketContext';
+import { AuthProvider, AuthContext } from './context/AuthContext';
 
 const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
 
-function App() {
+function AppContent() {
+  const { isAuthenticated, login } = useContext(AuthContext);
   const [socket, setSocket] = useState(null);
   const [emergencyAlerts, setEmergencyAlerts] = useState([]);
   const [crowdData, setCrowdData] = useState(null);
@@ -65,32 +70,45 @@ function App() {
     <SocketContext.Provider value={socket}>
       <Router>
         <div className="App min-h-screen bg-gradient-to-br from-orange-50 via-white to-green-50">
-          <Navbar />
-          
-          {/* Emergency Alerts Banner */}
-          {emergencyAlerts.length > 0 && (
-            <EmergencyAlert alerts={emergencyAlerts} onClose={(id) => 
-              setEmergencyAlerts(prev => prev.filter(alert => alert.id !== id))
-            } />
-          )}
-
           <Routes>
-            <Route path="/" element={
-              <>
-                <Hero />
-                <Dashboard crowdData={crowdData} />
-              </>
+            <Route path="/login" element={
+              isAuthenticated ? <Navigate to="/" /> : <Login onLogin={login} />
             } />
-            <Route path="/heatmap" element={<CrowdHeatmap />} />
-            <Route path="/safe-route" element={<SafeRoute />} />
-            <Route path="/prediction" element={<CrowdPrediction />} />
-            <Route path="/live-feed" element={<LiveVideoFeed />} />
-            <Route path="/lost-found" element={<LostFound />} />
-            <Route path="/medical" element={<MedicalEmergency />} />
-            <Route path="/weather" element={<Weather />} />
-          </Routes>
+            
+            <Route path="/*" element={
+              <ProtectedRoute>
+                <>
+                  <Navbar />
+                  
+                  {/* Emergency Alerts Banner */}
+                  {emergencyAlerts.length > 0 && (
+                    <EmergencyAlert alerts={emergencyAlerts} onClose={(id) => 
+                      setEmergencyAlerts(prev => prev.filter(alert => alert.id !== id))
+                    } />
+                  )}
 
-          <Footer />
+                  <Routes>
+                    <Route path="/" element={
+                      <>
+                        <Hero />
+                        <Dashboard crowdData={crowdData} />
+                      </>
+                    } />
+                    <Route path="/heatmap" element={<CrowdHeatmap />} />
+                    <Route path="/safe-route" element={<SafeRoute />} />
+                    <Route path="/prediction" element={<CrowdPrediction />} />
+                    <Route path="/live-feed" element={<LiveVideoFeed />} />
+                    <Route path="/lost-found" element={<LostFound />} />
+                    <Route path="/medical" element={<MedicalEmergency />} />
+                    <Route path="/weather" element={<Weather />} />
+                    <Route path="/kumbh-info" element={<KumbhInfo />} />
+                  </Routes>
+
+                  <Footer />
+                </>
+              </ProtectedRoute>
+            } />
+          </Routes>
 
           <ToastContainer
             position="bottom-right"
@@ -107,6 +125,14 @@ function App() {
         </div>
       </Router>
     </SocketContext.Provider>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

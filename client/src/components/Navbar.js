@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { FaBars, FaTimes, FaHome, FaMap, FaRoute, FaChartLine, FaVideo } from 'react-icons/fa';
+import { FaBars, FaTimes, FaHome, FaMap, FaRoute, FaChartLine, FaVideo, FaInfoCircle, FaSignOutAlt } from 'react-icons/fa';
 import LanguageSwitcher from './LanguageSwitcher';
+import { AuthContext } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const Navbar = () => {
   const { t } = useTranslation();
+  const { logout } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out successfully');
+    navigate('/login');
+  };
 
   const navItems = [
     { name: t('nav.home'), path: '/', icon: <FaHome /> },
@@ -15,6 +25,7 @@ const Navbar = () => {
     { name: t('nav.safeRoute'), path: '/safe-route', icon: <FaRoute /> },
     { name: t('nav.predictions'), path: '/prediction', icon: <FaChartLine /> },
     { name: t('nav.liveVideo'), path: '/live-feed', icon: <FaVideo /> },
+    { name: 'Kumbh Info', path: '/kumbh-info', icon: <FaInfoCircle /> },
   ];
 
   return (
@@ -83,6 +94,13 @@ const Navbar = () => {
                 <span className="font-medium">{item.name}</span>
               </Link>
             ))}
+            <button
+              onClick={handleLogout}
+              className="block w-full text-left px-4 py-3 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center space-x-3 my-1"
+            >
+              <FaSignOutAlt />
+              <span className="font-medium">Logout</span>
+            </button>
           </motion.div>
         )}
       </div>

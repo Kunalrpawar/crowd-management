@@ -47,11 +47,35 @@ const Hero = () => {
               <br />
               <span className="text-gray-800">Crowd Management</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-gray-600 mb-4 max-w-3xl mx-auto">
               Experience the future of crowd safety with AI-powered monitoring, 
               real-time analytics, and intelligent route planning for the world's 
               largest religious gathering.
             </p>
+            
+            {/* Four Sacred Locations Badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="mb-8 inline-block"
+            >
+              <div className="bg-gradient-to-r from-orange-500 via-white to-green-600 p-1 rounded-full">
+                <div className="bg-white px-6 py-3 rounded-full">
+                  <p className="text-sm font-semibold text-gray-700">
+                    🕉️ Monitoring All 4 Sacred Locations: 
+                    <span className="text-orange-600 ml-2">Prayagraj</span>
+                    <span className="mx-1">•</span>
+                    <span className="text-blue-600">Haridwar</span>
+                    <span className="mx-1">•</span>
+                    <span className="text-green-600">Nashik</span>
+                    <span className="mx-1">•</span>
+                    <span className="text-purple-600">Ujjain</span>
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+            
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <motion.button
                 whileHover={{ scale: 1.05 }}

@@ -9,6 +9,8 @@
 
 **A cutting-edge AI-powered crowd management system for the world's largest religious gathering**
 
+**🆕 Now monitoring ALL 4 sacred Kumbh Mela locations: Prayagraj • Haridwar • Nashik • Ujjain**
+
 [Features](#-features) • [Tech Stack](#-tech-stack) • [Installation](#-installation) • [Usage](#-usage) • [API](#-api-documentation)
 
 </div>
@@ -17,15 +19,16 @@
 
 ## 🌟 Overview
 
-The Kumbh Mela Crowd Management System is a comprehensive full-stack application designed to ensure safety and efficient crowd management for millions of pilgrims. Built with modern technologies including React, Node.js, AI/ML models (YOLO), and real-time WebSocket communication.
+The Kumbh Mela Crowd Management System is a comprehensive full-stack application designed to ensure safety and efficient crowd management for millions of pilgrims across **all four sacred locations** where the Kumbh Mela rotates every 12 years. Built with modern technologies including React, Node.js, AI/ML models (YOLO), and real-time WebSocket communication.
 
 ### 🎯 Key Highlights
 
-- 🗺️ **Real-time Crowd Heatmap** - Live visualization of crowd density across all zones
-- 🛣️ **AI-Powered Safe Routes** - Intelligent route suggestions avoiding congested areas
+- 🗺️ **Real-time Crowd Heatmap** - Live visualization across all 4 sacred locations
+- 🛣️ **AI-Powered Safe Routes** - Location-specific route planning for each city
 - 🚨 **Emergency Alert System** - Instant notifications for critical situations
 - 📊 **Crowd Prediction** - ML-based forecasting for better planning
 - 📹 **Live Video Feed** - YOLO-powered people detection and counting
+- 📍 **Multi-Location Support** - Prayagraj, Haridwar, Nashik, and Ujjain
 - 🎨 **Beautiful UI/UX** - Modern, responsive design with Kumbh Mela theme
 
 ---
@@ -34,8 +37,10 @@ The Kumbh Mela Crowd Management System is a comprehensive full-stack application
 
 ### 1. Live Crowd Heatmap 🗺️
 
+- **Multi-location monitoring** across all 4 sacred Kumbh Mela sites
 - **Real-time density visualization** using interactive maps
 - Color-coded zones (Green → Yellow → Red → Critical)
+- Location selector to switch between Prayagraj, Haridwar, Nashik, Ujjain
 - Click on zones for detailed information
 - Historical crowd data tracking
 - **Technologies**: React Leaflet, OpenStreetMap

@@ -9,9 +9,17 @@ const CrowdHeatmap = () => {
   const socket = useContext(SocketContext);
   const [crowdZones, setCrowdZones] = useState([]);
   const [selectedZone, setSelectedZone] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState('prayagraj');
   
-  // Prayagraj coordinates (approximate center of Kumbh Mela area)
-  const center = [25.4358, 81.8463];
+  // Four sacred Kumbh Mela locations
+  const kumbhLocations = {
+    prayagraj: { name: 'Prayagraj (Allahabad)', coords: [25.4358, 81.8463], rivers: 'Ganges, Yamuna, Saraswati' },
+    haridwar: { name: 'Haridwar', coords: [29.9457, 78.1642], rivers: 'Ganges' },
+    nashik: { name: 'Nashik', coords: [19.9975, 73.7898], rivers: 'Godavari' },
+    ujjain: { name: 'Ujjain', coords: [23.1765, 75.7885], rivers: 'Shipra' }
+  };
+  
+  const center = kumbhLocations[selectedLocation].coords;
 
   useEffect(() => {
     // Simulate crowd data for demo
@@ -58,8 +66,28 @@ const CrowdHeatmap = () => {
               Live Crowd Heatmap
             </h1>
             <p className="text-gray-600 text-lg">
-              Real-time crowd density monitoring across Kumbh Mela zones
+              Real-time crowd density monitoring across all four sacred Kumbh Mela locations
             </p>
+            
+            {/* Location Selector */}
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {Object.entries(kumbhLocations).map(([key, location]) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedLocation(key)}
+                  className={`px-5 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-md ${
+                    selectedLocation === key
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
+                      : 'bg-white text-gray-700 hover:bg-orange-50 border-2 border-orange-200'
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="font-bold">{location.name}</div>
+                    <div className="text-xs opacity-80">River: {location.rivers}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Legend */}
@@ -92,6 +120,7 @@ const CrowdHeatmap = () => {
           {/* Map */}
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <MapContainer
+              key={selectedLocation}
               center={center}
               zoom={14}
               style={{ height: '600px', width: '100%' }}
