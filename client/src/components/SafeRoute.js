@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import { motion } from 'framer-motion';
 import { FaRoute, FaMapMarkerAlt, FaClock, FaWalking } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -14,6 +15,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const SafeRoute = () => {
+  const { t } = useTranslation();
   const [startPoint, setStartPoint] = useState('');
   const [endPoint, setEndPoint] = useState('');
   const [route, setRoute] = useState(null);
@@ -115,10 +117,10 @@ const SafeRoute = () => {
         >
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold gradient-text mb-4">
-              Safe Route Planner
+              {t('routes.title')}
             </h1>
             <p className="text-gray-600 text-lg">
-              AI-powered route suggestions across all four sacred Kumbh Mela locations
+              {t('routes.avoidCrowds')}
             </p>
             
             {/* City Selector */}
@@ -150,14 +152,14 @@ const SafeRoute = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <FaMapMarkerAlt className="inline mr-2 text-green-600" />
-                  Starting Point
+                  {t('routes.from')}
                 </label>
                 <select
                   value={startPoint}
                   onChange={(e) => setStartPoint(e.target.value)}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-saffron-500 focus:border-transparent outline-none"
                 >
-                  <option value="">Select starting point</option>
+                  <option value="">{t('routes.selectStart')}</option>
                   {locations.map((loc, index) => (
                     <option key={index} value={loc.name}>
                       {loc.name}
@@ -169,14 +171,14 @@ const SafeRoute = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <FaMapMarkerAlt className="inline mr-2 text-red-600" />
-                  Destination
+                  {t('routes.to')}
                 </label>
                 <select
                   value={endPoint}
                   onChange={(e) => setEndPoint(e.target.value)}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-saffron-500 focus:border-transparent outline-none"
                 >
-                  <option value="">Select destination</option>
+                  <option value="">{t('routes.selectEnd')}</option>
                   {locations.map((loc, index) => (
                     <option key={index} value={loc.name}>
                       {loc.name}
@@ -193,7 +195,7 @@ const SafeRoute = () => {
                   disabled={!startPoint || !endPoint || loading}
                   className="w-full px-6 py-3 bg-gradient-to-r from-saffron-500 to-spiritual-green text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all duration-300"
                 >
-                  {loading ? 'Finding Route...' : 'Find Safe Route'}
+                  {loading ? t('routes.calculating') : t('routes.findRoute')}
                 </motion.button>
               </div>
             </div>
@@ -207,23 +209,23 @@ const SafeRoute = () => {
               >
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4">
                   <FaRoute className="text-2xl text-blue-600 mb-2" />
-                  <p className="text-sm text-gray-600">Distance</p>
+                  <p className="text-sm text-gray-600">{t('routes.distance')}</p>
                   <p className="text-2xl font-bold text-gray-800">{route.distance} km</p>
                 </div>
                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4">
                   <FaClock className="text-2xl text-green-600 mb-2" />
-                  <p className="text-sm text-gray-600">Est. Time</p>
+                  <p className="text-sm text-gray-600">{t('routes.estTime')}</p>
                   <p className="text-2xl font-bold text-gray-800">{route.time} min</p>
                 </div>
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4">
                   <FaWalking className="text-2xl text-purple-600 mb-2" />
-                  <p className="text-sm text-gray-600">Crowd Level</p>
+                  <p className="text-sm text-gray-600">{t('routes.crowdLevel')}</p>
                   <p className="text-2xl font-bold text-gray-800">{route.crowdLevel}</p>
                 </div>
                 <div className="bg-gradient-to-br from-saffron-50 to-saffron-100 rounded-lg p-4">
                   <div className="text-2xl mb-2">✓</div>
-                  <p className="text-sm text-gray-600">Safety</p>
-                  <p className="text-2xl font-bold text-gray-800">High</p>
+                  <p className="text-sm text-gray-600">{t('routes.safety')}</p>
+                  <p className="text-2xl font-bold text-gray-800">{t('routes.safetyHigh')}</p>
                 </div>
               </motion.div>
             )}
@@ -261,11 +263,12 @@ const SafeRoute = () => {
                   />
                   <Marker position={route.start.coords}>
                     <Popup>
-                      <strong>Start: {route.start.name}</strong>
+                      <strong>{t('routes.startLabel')}: {route.start.name}</strong>
                     </Popup>
                   </Marker>
                   <Marker position={route.end.coords}>
                     <Popup>
+                      <strong>{t('routes.endLabel')}: {route.end.name}</strong>
                       <strong>Destination: {route.end.name}</strong>
                     </Popup>
                   </Marker>

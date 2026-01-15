@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaExclamationTriangle, FaInfoCircle, FaBullhorn } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 const EmergencyAlert = ({ alerts, onClose }) => {
+  const { t } = useTranslation();
   const getAlertStyle = (type) => {
     switch (type) {
       case 'critical':

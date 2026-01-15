@@ -1,28 +1,31 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaShieldAlt, FaUsers, FaMapMarkedAlt, FaBrain } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 const Hero = () => {
+  const { t } = useTranslation();
+  
   const features = [
     {
       icon: <FaMapMarkedAlt className="text-4xl" />,
-      title: 'Live Heatmap',
-      description: 'Real-time crowd density monitoring'
+      title: t('hero.liveHeatmap'),
+      description: t('hero.liveHeatmapDesc')
     },
     {
       icon: <FaShieldAlt className="text-4xl" />,
-      title: 'Safe Routes',
-      description: 'AI-powered route suggestions'
+      title: t('hero.safeRoutes'),
+      description: t('hero.safeRoutesDesc')
     },
     {
       icon: <FaUsers className="text-4xl" />,
-      title: 'Crowd Detection',
-      description: 'YOLO-based people counting'
+      title: t('hero.crowdDetection'),
+      description: t('hero.crowdDetectionDesc')
     },
     {
       icon: <FaBrain className="text-4xl" />,
-      title: 'Predictions',
-      description: 'Future crowd density forecasts'
+      title: t('hero.predictions'),
+      description: t('hero.predictionsDesc')
     }
   ];
 
@@ -43,14 +46,12 @@ const Hero = () => {
             transition={{ duration: 0.8 }}
           >
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              <span className="gradient-text">Kumbh Mela</span>
+              <span className="gradient-text">{t('hero.mainTitle')}</span>
               <br />
-              <span className="text-gray-800">Crowd Management</span>
+              <span className="text-gray-800">{t('hero.mainSubtitle')}</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-4 max-w-3xl mx-auto">
-              Experience the future of crowd safety with AI-powered monitoring, 
-              real-time analytics, and intelligent route planning for the world's 
-              largest religious gathering.
+              {t('hero.tagline')}
             </p>
             
             {/* Four Sacred Locations Badge */}

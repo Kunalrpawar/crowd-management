@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -30,6 +31,7 @@ ChartJS.register(
 );
 
 const CrowdPrediction = () => {
+  const { t } = useTranslation();
   const [timeRange, setTimeRange] = useState('24h');
   const [predictionData, setPredictionData] = useState(null);
 
@@ -68,7 +70,7 @@ const CrowdPrediction = () => {
     labels: predictionData.labels,
     datasets: [
       {
-        label: 'Current Crowd',
+        label: t('predictions.current'),
         data: predictionData.currentCrowd,
         borderColor: '#3b82f6',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -76,7 +78,7 @@ const CrowdPrediction = () => {
         tension: 0.4,
       },
       {
-        label: 'Predicted Crowd',
+        label: t('predictions.predicted'),
         data: predictionData.predictedCrowd,
         borderColor: '#f97316',
         backgroundColor: 'rgba(249, 115, 22, 0.1)',
@@ -91,12 +93,12 @@ const CrowdPrediction = () => {
     labels: ['Sangam Nose', 'Triveni Ghat', 'Parade Ground', 'Sector 1', 'Sector 2'],
     datasets: [
       {
-        label: 'Current',
+        label: t('predictions.current'),
         data: [85000, 65000, 55000, 45000, 42000],
         backgroundColor: 'rgba(59, 130, 246, 0.7)',
       },
       {
-        label: 'Predicted (2h)',
+        label: t('predictions.predicted2h'),
         data: [95000, 72000, 48000, 52000, 38000],
         backgroundColor: 'rgba(249, 115, 22, 0.7)',
       }
@@ -104,7 +106,7 @@ const CrowdPrediction = () => {
   };
 
   const doughnutData = {
-    labels: ['Low Risk', 'Medium Risk', 'High Risk', 'Critical'],
+    labels: [t('crowd.low'), t('crowd.medium'), t('crowd.high'), t('crowd.critical')],
     datasets: [{
       data: [45, 30, 20, 5],
       backgroundColor: [
@@ -152,10 +154,10 @@ const CrowdPrediction = () => {
         >
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold gradient-text mb-4">
-              Crowd Prediction & Analytics
+              {t('predictions.title')}
             </h1>
             <p className="text-gray-600 text-lg">
-              AI-powered forecasting for better crowd management
+              {t('predictions.subtitle')}
             </p>
           </div>
 
@@ -177,7 +179,7 @@ const CrowdPrediction = () => {
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    {range === '24h' ? '24 Hours' : range === '48h' ? '48 Hours' : '7 Days'}
+                    {range === '24h' ? t('predictions.hours24') : range === '48h' ? t('predictions.hours48') : t('predictions.days7')}
                   </button>
                 ))}
               </div>

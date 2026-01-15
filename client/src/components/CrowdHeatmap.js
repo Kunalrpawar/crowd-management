@@ -2,10 +2,12 @@ import React, { useState, useEffect, useContext } from 'react';
 import { MapContainer, TileLayer, Circle, Popup, useMap } from 'react-leaflet';
 import { motion } from 'framer-motion';
 import { FaFire, FaUsers, FaExclamationCircle } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import { SocketContext } from '../context/SocketContext';
 import 'leaflet/dist/leaflet.css';
 
 const CrowdHeatmap = () => {
+  const { t } = useTranslation();
   const socket = useContext(SocketContext);
   const [crowdZones, setCrowdZones] = useState([]);
   const [selectedZone, setSelectedZone] = useState(null);
@@ -43,10 +45,10 @@ const CrowdHeatmap = () => {
   }, []);
 
   const getDensityColor = (density) => {
-    if (density < 0.3) return { color: '#10b981', label: 'Low' }; // Green
-    if (density < 0.6) return { color: '#f59e0b', label: 'Medium' }; // Orange
-    if (density < 0.8) return { color: '#f97316', label: 'High' }; // Dark Orange
-    return { color: '#ef4444', label: 'Critical' }; // Red
+    if (density < 0.3) return { color: '#10b981', label: t('crowd.low') }; // Green
+    if (density < 0.6) return { color: '#f59e0b', label: t('crowd.medium') }; // Orange
+    if (density < 0.8) return { color: '#f97316', label: t('crowd.high') }; // Dark Orange
+    return { color: '#ef4444', label: t('crowd.critical') }; // Red
   };
 
   const getRadius = (people) => {
@@ -63,10 +65,10 @@ const CrowdHeatmap = () => {
         >
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold gradient-text mb-4">
-              Live Crowd Heatmap
+              {t('crowd.heatmapTitle')}
             </h1>
             <p className="text-gray-600 text-lg">
-              Real-time crowd density monitoring across all four sacred Kumbh Mela locations
+              {t('crowd.heatmapSubtitle')}
             </p>
             
             {/* Location Selector */}
@@ -83,7 +85,7 @@ const CrowdHeatmap = () => {
                 >
                   <div className="text-center">
                     <div className="font-bold">{location.name}</div>
-                    <div className="text-xs opacity-80">River: {location.rivers}</div>
+                    <div className="text-xs opacity-80">{t('crowd.river')}: {location.rivers}</div>
                   </div>
                 </button>
               ))}
@@ -94,14 +96,14 @@ const CrowdHeatmap = () => {
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
             <h3 className="font-bold text-gray-800 mb-4 flex items-center">
               <FaFire className="text-saffron-600 mr-2" />
-              Crowd Density Legend
+              {t('crowd.legend')}
             </h3>
             <div className="flex flex-wrap gap-4">
               {[
-                { color: '#10b981', label: 'Low (Safe)', range: '0-30%' },
-                { color: '#f59e0b', label: 'Medium', range: '30-60%' },
-                { color: '#f97316', label: 'High', range: '60-80%' },
-                { color: '#ef4444', label: 'Critical (Danger)', range: '80-100%' }
+                { color: '#10b981', label: `${t('crowd.low')} (${t('common.safe')})`, range: '0-30%' },
+                { color: '#f59e0b', label: t('crowd.medium'), range: '30-60%' },
+                { color: '#f97316', label: t('crowd.high'), range: '60-80%' },
+                { color: '#ef4444', label: `${t('crowd.critical')} (${t('common.danger')})`, range: '80-100%' }
               ].map((item, index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <div

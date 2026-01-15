@@ -19,7 +19,9 @@
         "previous": "Previous",
         "select": "Select",
         "all": "All",
-        "none": "None"
+        "none": "None",
+        "safe": "Safe",
+        "danger": "Danger"
       },
       "nav": {
         "home": "Home",
@@ -31,12 +33,50 @@
         "lostFound": "Lost & Found",
         "medical": "Medical Help",
         "weather": "Weather",
-        "dashboard": "Dashboard"
+        "dashboard": "Dashboard",
+        "kumbhInfo": "Kumbh Info"
       },
-      "hero": {
-        "title": "Kumbh Mela 2025",
-        "subtitle": "AI-Powered Crowd Management System",
-        "description": "Ensuring safety and comfort for millions of pilgrims with real-time monitoring and intelligent solutions"
+      "predictions": {
+        "title": "Crowd Predictions",
+        "subtitle": "AI-powered crowd forecasting",
+        "timeRange": "Time Range",
+        "hours24": "24 Hours",
+        "hours48": "48 Hours",
+        "days7": "7 Days",
+        "current": "Current Crowd",
+        "predicted": "Predicted Crowd",
+        "predicted2h": "Predicted (2h)",
+        "peakHours": "Peak Hours",
+        "lowTraffic": "Low Traffic Times",
+        "recommendations": "Recommendations",
+        "bestVisitTime": "Best Time to Visit"
+      },
+      "liveFeed": {
+        "title": "Live Video Feed - AI Detection",
+        "subtitle": "YOLO-powered real-time crowd detection and counting",
+        "detections": "Detections",
+        "totalPeople": "Total People",
+        "peopleDetected": "People Detected",
+        "density": "Crowd Density",
+        "alerts": "Active Alerts",
+        "play": "Play",
+        "pause": "Pause",
+        "start": "Start Detection",
+        "stop": "Stop Detection",
+        "live": "LIVE",
+        "paused": "PAUSED",
+        "cameraFeed": "Camera Feed - Zone A (Sangam Nose)",
+        "processing": "Processing...",
+        "mlModel": "ML Model Info",
+        "accuracy": "Accuracy",
+        "highConfidence": "High Confidence",
+        "mediumConfidence": "Medium Confidence",
+        "realtimeDetection": "Real-time Detection",
+        "yoloModel": "YOLO v8 model processes video at 30 FPS",
+        "accurateCounting": "Accurate Counting",
+        "countAccuracy": "Count people with 95%+ accuracy",
+        "instantAlerts": "Instant Alerts",
+        "thresholdNotif": "Get notified when crowd exceeds threshold"
       },
       "lostFound": {
         "title": "Lost & Found",
@@ -132,7 +172,14 @@
         "safeZones": "Safe Zones",
         "dangerZones": "Danger Zones",
         "totalPeople": "Total People",
-        "avgWaitTime": "Average Wait Time"
+        "avgWaitTime": "Average Wait Time",
+        "heatmapTitle": "Live Crowd Heatmap",
+        "heatmapSubtitle": "Real-time monitoring across all 4 sacred locations",
+        "selectLocation": "Select Location",
+        "legend": "Legend",
+        "river": "River",
+        "zoneDetails": "Zone Details",
+        "currentDensity": "Current Density"
       },
       "alerts": {
         "emergency": "Emergency Alert",
@@ -151,13 +198,50 @@
         "distance": "Distance",
         "duration": "Duration",
         "safetyScore": "Safety Score",
-        "avoidCrowds": "Avoiding Crowded Areas"
+        "avoidCrowds": "AI-powered route suggestions across all four sacred Kumbh Mela locations",
+        "selectCity": "Select City",
+        "selectStart": "Select starting point",
+        "selectEnd": "Select destination",
+        "calculating": "Finding Route...",
+        "routeFound": "Safe route found!",
+        "estimatedTime": "Estimated Time",
+        "estTime": "Est. Time",
+        "crowdLevel": "Crowd Level",
+        "safety": "Safety",
+        "safetyHigh": "High",
+        "startLabel": "Start",
+        "endLabel": "Destination"
       },
       "dashboard": {
         "title": "Dashboard",
         "stats": "Statistics",
         "recentUpdates": "Recent Updates",
-        "quickAccess": "Quick Access"
+        "quickAccess": "Quick Access",
+        "liveStats": "Live Crowd Statistics",
+        "findLostPersons": "Find missing persons and reunite families",
+        "clickToAccess": "Click to Access",
+        "emergencyMedical": "Emergency medical assistance at your fingertips",
+        "checkWeather": "Check weather conditions and best visiting times",
+        "viewWeather": "View Weather",
+        "minutes": "mins"
+      },
+      "hero": {
+        "title": "Kumbh Mela 2025",
+        "subtitle": "AI-Powered Crowd Management System",
+        "description": "Ensuring safety and comfort for millions of pilgrims with real-time monitoring and intelligent solutions",
+        "mainTitle": "Kumbh Mela",
+        "mainSubtitle": "Crowd Management",
+        "tagline": "Experience the future of crowd safety with AI-powered solutions",
+        "liveHeatmap": "Live Heatmap",
+        "liveHeatmapDesc": "Real-time crowd density monitoring",
+        "safeRoutes": "Safe Routes",
+        "safeRoutesDesc": "AI-powered route suggestions",
+        "crowdDetection": "Crowd Detection",
+        "crowdDetectionDesc": "YOLO-based people counting",
+        "predictions": "Predictions",
+        "predictionsDesc": "Future crowd density forecasts",
+        "getStarted": "Get Started",
+        "learnMore": "Learn More"
       },
       "footer": {
         "rights": "All rights reserved",
@@ -188,7 +272,9 @@
         "previous": "पिछला",
         "select": "चुनें",
         "all": "सभी",
-        "none": "कोई नहीं"
+        "none": "कोई नहीं",
+        "safe": "सुरक्षित",
+        "danger": "खतरा"
       },
       "nav": {
         "home": "मुख्य पृष्ठ",
@@ -200,12 +286,50 @@
         "lostFound": "खोया पाया",
         "medical": "चिकित्सा सहायता",
         "weather": "मौसम",
-        "dashboard": "डैशबोर्ड"
+        "dashboard": "डैशबोर्ड",
+        "kumbhInfo": "कुंभ जानकारी"
       },
-      "hero": {
-        "title": "कुंभ मेला 2025",
-        "subtitle": "एआई-संचालित भीड़ प्रबंधन प्रणाली",
-        "description": "लाखों श्रद्धालुओं की सुरक्षा और आराम सुनिश्चित करना"
+      "predictions": {
+        "title": "भीड़ भविष्यवाणी",
+        "subtitle": "एआई-संचालित भीड़ पूर्वानुमान",
+        "timeRange": "समय सीमा",
+        "hours24": "24 घंटे",
+        "hours48": "48 घंटे",
+        "days7": "7 दिन",
+        "current": "वर्तमान भीड़",
+        "predicted": "अनुमानित भीड़",
+        "predicted2h": "अनुमानित (2 घंटे)",
+        "peakHours": "चरम घंटे",
+        "lowTraffic": "कम भीड़ समय",
+        "recommendations": "सिफारिशें",
+        "bestVisitTime": "यात्रा का सर्वोत्तम समय"
+      },
+      "liveFeed": {
+        "title": "लाइव वीडियो फीड - एआई पहचान",
+        "subtitle": "YOLO-संचालित वास्तविक समय भीड़ पहचान और गिनती",
+        "detections": "पहचान",
+        "totalPeople": "कुल लोग",
+        "peopleDetected": "लोग पहचाने गए",
+        "density": "भीड़ घनत्व",
+        "alerts": "सक्रिय सूचनाएं",
+        "play": "चलाएं",
+        "pause": "रोकें",
+        "start": "पहचान शुरू करें",
+        "stop": "पहचान रोकें",
+        "live": "लाइव",
+        "paused": "रुका हुआ",
+        "cameraFeed": "कैमरा फीड - क्षेत्र ए (संगम नोज़)",
+        "processing": "प्रक्रिया जारी...",
+        "mlModel": "एमएल मॉडल जानकारी",
+        "accuracy": "सटीकता",
+        "highConfidence": "उच्च विश्वास",
+        "mediumConfidence": "मध्यम विश्वास",
+        "realtimeDetection": "वास्तविक समय पहचान",
+        "yoloModel": "YOLO v8 मॉडल 30 FPS पर वीडियो प्रोसेस करता है",
+        "accurateCounting": "सटीक गिनती",
+        "countAccuracy": "95%+ सटीकता के साथ लोगों की गिनती करें",
+        "instantAlerts": "तत्काल सूचनाएं",
+        "thresholdNotif": "भीड़ सीमा पार करने पर सूचना प्राप्त करें"
       },
       "lostFound": {
         "title": "खोया पाया",
@@ -301,7 +425,14 @@
         "safeZones": "सुरक्षित क्षेत्र",
         "dangerZones": "खतरनाक क्षेत्र",
         "totalPeople": "कुल लोग",
-        "avgWaitTime": "औसत प्रतीक्षा समय"
+        "avgWaitTime": "औसत प्रतीक्षा समय",
+        "heatmapTitle": "लाइव भीड़ हीटमैप",
+        "heatmapSubtitle": "सभी 4 पवित्र स्थानों पर वास्तविक समय निगरानी",
+        "selectLocation": "स्थान चुनें",
+        "legend": "लीजेंड",
+        "river": "नदी",
+        "zoneDetails": "क्षेत्र विवरण",
+        "currentDensity": "वर्तमान घनत्व"
       },
       "alerts": {
         "emergency": "आपातकालीन सूचना",
@@ -320,13 +451,50 @@
         "distance": "दूरी",
         "duration": "अवधि",
         "safetyScore": "सुरक्षा स्कोर",
-        "avoidCrowds": "भीड़भाड़ वाले क्षेत्रों से बचें"
+        "avoidCrowds": "सभी चार पवित्र कुंभ मेला स्थानों पर एआई-संचालित मार्ग सुझाव",
+        "selectCity": "शहर चुनें",
+        "selectStart": "प्रारंभिक बिंदु चुनें",
+        "selectEnd": "गंतव्य चुनें",
+        "calculating": "मार्ग खोजा जा रहा है...",
+        "routeFound": "सुरक्षित मार्ग मिल गया!",
+        "estimatedTime": "अनुमानित समय",
+        "estTime": "अनु. समय",
+        "crowdLevel": "भीड़ स्तर",
+        "safety": "सुरक्षा",
+        "safetyHigh": "उच्च",
+        "startLabel": "शुरुआत",
+        "endLabel": "गंतव्य"
       },
       "dashboard": {
         "title": "डैशबोर्ड",
         "stats": "आंकड़े",
         "recentUpdates": "हाल की अपडेट",
-        "quickAccess": "त्वरित पहुँच"
+        "quickAccess": "त्वरित पहुँच",
+        "liveStats": "लाइव भीड़ आंकड़े",
+        "findLostPersons": "लापता व्यक्तियों को खोजें और परिवारों को फिर से मिलाएं",
+        "clickToAccess": "एक्सेस करने के लिए क्लिक करें",
+        "emergencyMedical": "आपकी उंगलियों पर आपातकालीन चिकित्सा सहायता",
+        "checkWeather": "मौसम की स्थिति और यात्रा के सर्वोत्तम समय की जांच करें",
+        "viewWeather": "मौसम देखें",
+        "minutes": "मिनट"
+      },
+      "hero": {
+        "title": "कुंभ मेला 2025",
+        "subtitle": "एआई-संचालित भीड़ प्रबंधन प्रणाली",
+        "description": "लाखों श्रद्धालुओं की सुरक्षा और आराम सुनिश्चित करना",
+        "mainTitle": "कुंभ मेला",
+        "mainSubtitle": "भीड़ प्रबंधन",
+        "tagline": "एआई-संचालित समाधानों के साथ भीड़ सुरक्षा के भविष्य का अनुभव करें",
+        "liveHeatmap": "लाइव हीटमैप",
+        "liveHeatmapDesc": "वास्तविक समय भीड़ घनत्व निगरानी",
+        "safeRoutes": "सुरक्षित मार्ग",
+        "safeRoutesDesc": "एआई-संचालित मार्ग सुझाव",
+        "crowdDetection": "भीड़ पहचान",
+        "crowdDetectionDesc": "YOLO-आधारित लोग गिनती",
+        "predictions": "भविष्यवाणी",
+        "predictionsDesc": "भविष्य की भीड़ घनत्व पूर्वानुमान",
+        "getStarted": "शुरू करें",
+        "learnMore": "और जानें"
       },
       "footer": {
         "rights": "सर्वाधिकार सुरक्षित",

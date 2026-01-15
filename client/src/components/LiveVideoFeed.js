@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { FaVideo, FaPlay, FaPause, FaUsers, FaExclamationTriangle } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 const LiveVideoFeed = () => {
+  const { t } = useTranslation();
   const [isPlaying, setIsPlaying] = useState(false);
   const [detections, setDetections] = useState([]);
   const [stats, setStats] = useState({
@@ -78,10 +80,10 @@ const LiveVideoFeed = () => {
         >
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold gradient-text mb-4">
-              Live Video Feed - AI Detection
+              {t('liveFeed.title')}
             </h1>
             <p className="text-gray-600 text-lg">
-              YOLO-powered real-time crowd detection and counting
+              {t('liveFeed.subtitle')}
             </p>
           </div>
 
@@ -93,7 +95,7 @@ const LiveVideoFeed = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600 text-sm mb-1">People Detected</p>
+                  <p className="text-gray-600 text-sm mb-1">{t('liveFeed.peopleDetected')}</p>
                   <p className="text-4xl font-bold text-blue-600">{stats.totalPeople}</p>
                 </div>
                 <FaUsers className="text-5xl text-blue-600 opacity-20" />
@@ -106,7 +108,7 @@ const LiveVideoFeed = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600 text-sm mb-1">Crowd Density</p>
+                  <p className="text-gray-600 text-sm mb-1">{t('liveFeed.density')}</p>
                   <p className="text-4xl font-bold text-saffron-600">{stats.density}%</p>
                 </div>
                 <FaVideo className="text-5xl text-saffron-600 opacity-20" />
@@ -119,7 +121,7 @@ const LiveVideoFeed = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600 text-sm mb-1">Active Alerts</p>
+                  <p className="text-gray-600 text-sm mb-1">{t('liveFeed.alerts')}</p>
                   <p className="text-4xl font-bold text-red-600">{stats.alerts}</p>
                 </div>
                 <FaExclamationTriangle className="text-5xl text-red-600 opacity-20" />
@@ -133,12 +135,12 @@ const LiveVideoFeed = () => {
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-white flex items-center">
                   <FaVideo className="mr-2" />
-                  Camera Feed - Zone A (Sangam Nose)
+                  {t('liveFeed.cameraFeed')}
                 </h2>
                 <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
                   isPlaying ? 'bg-green-500 text-white animate-pulse' : 'bg-gray-300 text-gray-700'
                 }`}>
-                  {isPlaying ? '● LIVE' : '○ PAUSED'}
+                  {isPlaying ? `● ${t('liveFeed.live')}` : `○ ${t('liveFeed.paused')}`}
                 </span>
               </div>
             </div>
@@ -197,17 +199,17 @@ const LiveVideoFeed = () => {
                         : 'bg-green-600 hover:bg-green-700 text-white'
                     }`}
                   >
-                    {isPlaying ? 'Stop Detection' : 'Start Detection'}
+                    {isPlaying ? t('liveFeed.stop') : t('liveFeed.start')}
                   </button>
                 </div>
                 <div className="flex items-center space-x-4 text-sm text-gray-600">
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span>High Confidence</span>
+                    <span>{t('liveFeed.highConfidence')}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <span>Medium Confidence</span>
+                    <span>{t('liveFeed.mediumConfidence')}</span>
                   </div>
                 </div>
               </div>
@@ -218,18 +220,18 @@ const LiveVideoFeed = () => {
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                title: 'Real-time Detection',
-                description: 'YOLO v8 model processes video at 30 FPS',
+                title: t('liveFeed.realtimeDetection'),
+                description: t('liveFeed.yoloModel'),
                 icon: '⚡'
               },
               {
-                title: 'Accurate Counting',
-                description: 'Count people with 95%+ accuracy',
+                title: t('liveFeed.accurateCounting'),
+                description: t('liveFeed.countAccuracy'),
                 icon: '🎯'
               },
               {
-                title: 'Instant Alerts',
-                description: 'Get notified when crowd exceeds threshold',
+                title: t('liveFeed.instantAlerts'),
+                description: t('liveFeed.thresholdNotif'),
                 icon: '🔔'
               }
             ].map((feature, index) => (

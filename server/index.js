@@ -26,6 +26,7 @@ app.use('/api/ml', require('./routes/ml'));
 app.use('/api/lostfound', require('./routes/lostfound'));
 app.use('/api/medical', require('./routes/medical'));
 app.use('/api/weather', require('./routes/weather'));
+app.use('/api/track-nashik', require('./routes/track-nashik'));
 
 // Health check
 app.get('/api/health', (req, res) => {

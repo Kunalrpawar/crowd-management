@@ -21,6 +21,13 @@ import KumbhInfo from './components/KumbhInfo';
 import Login from './components/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import Footer from './components/Footer';
+import MediTracker from './components/MediTracker';
+import TrackNashik from './components/TrackNashik';
+import Maps3D from './components/Maps3D';
+import Maps3DNew from './components/Maps3DNew';
+import Epimetrics from './components/Epimetrics';
+import Ashioto from './components/Ashioto';
+import Annadan from './components/Annadan';
 
 // Context
 import { SocketContext } from './context/SocketContext';
@@ -80,31 +87,41 @@ function AppContent() {
                 <>
                   <Navbar />
                   
-                  {/* Emergency Alerts Banner */}
-                  {emergencyAlerts.length > 0 && (
-                    <EmergencyAlert alerts={emergencyAlerts} onClose={(id) => 
-                      setEmergencyAlerts(prev => prev.filter(alert => alert.id !== id))
-                    } />
-                  )}
+                  {/* Add padding for fixed navbar */}
+                  <div className="pt-24">
+                    {/* Emergency Alerts Banner */}
+                    {emergencyAlerts.length > 0 && (
+                      <EmergencyAlert alerts={emergencyAlerts} onClose={(id) => 
+                        setEmergencyAlerts(prev => prev.filter(alert => alert.id !== id))
+                      } />
+                    )}
 
-                  <Routes>
-                    <Route path="/" element={
-                      <>
-                        <Hero />
-                        <Dashboard crowdData={crowdData} />
-                      </>
-                    } />
-                    <Route path="/heatmap" element={<CrowdHeatmap />} />
-                    <Route path="/safe-route" element={<SafeRoute />} />
-                    <Route path="/prediction" element={<CrowdPrediction />} />
-                    <Route path="/live-feed" element={<LiveVideoFeed />} />
-                    <Route path="/lost-found" element={<LostFound />} />
-                    <Route path="/medical" element={<MedicalEmergency />} />
-                    <Route path="/weather" element={<Weather />} />
-                    <Route path="/kumbh-info" element={<KumbhInfo />} />
-                  </Routes>
+                    <Routes>
+                      <Route path="/" element={
+                        <>
+                          <Hero />
+                          <Dashboard crowdData={crowdData} />
+                        </>
+                      } />
+                      <Route path="/heatmap" element={<CrowdHeatmap />} />
+                      <Route path="/safe-route" element={<SafeRoute />} />
+                      <Route path="/prediction" element={<CrowdPrediction />} />
+                      <Route path="/live-feed" element={<LiveVideoFeed />} />
+                      <Route path="/lost-found" element={<LostFound />} />
+                      <Route path="/medical" element={<MedicalEmergency />} />
+                      <Route path="/weather" element={<Weather />} />
+                      <Route path="/kumbh-info" element={<KumbhInfo />} />
+                      <Route path="/medi-tracker" element={<MediTracker />} />
+                      <Route path="/track-nashik" element={<TrackNashik />} />
+                      <Route path="/maps-3d" element={<Maps3DNew />} />
+                      <Route path="/maps-3d-old" element={<Maps3D />} />
+                      <Route path="/epimetrics" element={<Epimetrics />} />
+                      <Route path="/ashioto" element={<Ashioto />} />
+                      <Route path="/annadan" element={<Annadan />} />
+                    </Routes>
 
-                  <Footer />
+                    <Footer />
+                  </div>
                 </>
               </ProtectedRoute>
             } />

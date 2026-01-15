@@ -50,7 +50,7 @@ const Dashboard = ({ crowdData }) => {
   const statCards = [
     {
       icon: <FaUsers className="text-4xl" />,
-      title: 'Total People',
+      title: t('crowd.totalPeople'),
       value: stats.totalPeople.toLocaleString(),
       color: 'from-blue-500 to-blue-600',
       bgColor: 'bg-blue-50',
@@ -58,7 +58,7 @@ const Dashboard = ({ crowdData }) => {
     },
     {
       icon: <FaExclamationTriangle className="text-4xl" />,
-      title: 'Danger Zones',
+      title: t('crowd.dangerZones'),
       value: stats.dangerZones,
       color: 'from-red-500 to-red-600',
       bgColor: 'bg-red-50',
@@ -66,7 +66,7 @@ const Dashboard = ({ crowdData }) => {
     },
     {
       icon: <FaCheckCircle className="text-4xl" />,
-      title: 'Safe Zones',
+      title: t('crowd.safeZones'),
       value: stats.safeZones,
       color: 'from-green-500 to-green-600',
       bgColor: 'bg-green-50',
@@ -74,8 +74,8 @@ const Dashboard = ({ crowdData }) => {
     },
     {
       icon: <FaClock className="text-4xl" />,
-      title: 'Avg Wait Time',
-      value: `${stats.averageWaitTime} min`,
+      title: t('crowd.avgWaitTime'),
+      value: `${stats.averageWaitTime} ${t('dashboard.minutes')}`,
       color: 'from-saffron-500 to-saffron-600',
       bgColor: 'bg-orange-50',
       iconColor: 'text-saffron-600'
@@ -90,7 +90,7 @@ const Dashboard = ({ crowdData }) => {
         transition={{ duration: 0.5 }}
       >
         <h2 className="text-4xl font-bold text-center mb-12 gradient-text">
-          Live Dashboard
+          {t('dashboard.liveStats')}
         </h2>
 
         {/* Stats Grid */}
@@ -121,7 +121,7 @@ const Dashboard = ({ crowdData }) => {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="bg-white rounded-2xl shadow-lg p-6 mb-12"
         >
-          <h3 className="text-2xl font-bold mb-6 text-gray-800">Recent Updates</h3>
+          <h3 className="text-2xl font-bold mb-6 text-gray-800">{t('dashboard.recentUpdates')}</h3>
           <div className="space-y-4">
             {recentUpdates.map((update, index) => (
               <div
@@ -147,7 +147,7 @@ const Dashboard = ({ crowdData }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
         >
-          <h3 className="text-2xl font-bold mb-6 text-gray-800 text-center">Quick Access</h3>
+          <h3 className="text-2xl font-bold mb-6 text-gray-800 text-center">{t('dashboard.quickAccess')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Lost & Found Card */}
             <motion.div
@@ -159,10 +159,10 @@ const Dashboard = ({ crowdData }) => {
                 <FaSearch className="text-5xl mb-4" />
                 <h4 className="text-2xl font-bold mb-2">{t('nav.lostFound')}</h4>
                 <p className="text-white/90 text-sm">
-                  Report missing persons or found individuals. Help reunite families.
+                  {t('dashboard.findLostPersons')}
                 </p>
                 <div className="mt-4 inline-block bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  <span className="font-semibold">Click to Access →</span>
+                  <span className="font-semibold">{t('dashboard.clickToAccess')} →</span>
                 </div>
               </div>
             </motion.div>
@@ -177,10 +177,10 @@ const Dashboard = ({ crowdData }) => {
                 <FaAmbulance className="text-5xl mb-4" />
                 <h4 className="text-2xl font-bold mb-2">{t('nav.medical')}</h4>
                 <p className="text-white/90 text-sm">
-                  Emergency medical assistance. Ambulance dispatch and facility locator.
+                  {t('dashboard.emergencyMedical')}
                 </p>
                 <div className="mt-4 inline-block bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  <span className="font-semibold">Helpline: 108 →</span>
+                  <span className="font-semibold">{t('medical.helpline')} →</span>
                 </div>
               </div>
             </motion.div>
@@ -195,10 +195,10 @@ const Dashboard = ({ crowdData }) => {
                 <FaCloudSun className="text-5xl mb-4" />
                 <h4 className="text-2xl font-bold mb-2">{t('nav.weather')}</h4>
                 <p className="text-white/90 text-sm">
-                  Real-time weather, forecasts, and best bathing times.
+                  {t('dashboard.checkWeather')}
                 </p>
                 <div className="mt-4 inline-block bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  <span className="font-semibold">View Weather →</span>
+                  <span className="font-semibold">{t('dashboard.viewWeather')} →</span>
                 </div>
               </div>
             </motion.div>
