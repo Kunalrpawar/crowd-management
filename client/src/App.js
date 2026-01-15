@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import './i18n/i18n';
 
 // Components
-import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
 import Hero from './components/Hero';
 import Dashboard from './components/Dashboard';
 import CrowdHeatmap from './components/CrowdHeatmap';
@@ -28,6 +28,8 @@ import Maps3DNew from './components/Maps3DNew';
 import Epimetrics from './components/Epimetrics';
 import Ashioto from './components/Ashioto';
 import Annadan from './components/Annadan';
+import ChatBot from './components/ChatBot';
+import CrowdSteeringMobile from './components/CrowdSteeringMobile';
 
 // Context
 import { SocketContext } from './context/SocketContext';
@@ -85,10 +87,11 @@ function AppContent() {
             <Route path="/*" element={
               <ProtectedRoute>
                 <>
-                  <Navbar />
+                  <Sidebar />
+                  <ChatBot />
                   
-                  {/* Add padding for fixed navbar */}
-                  <div className="pt-24">
+                  {/* Add padding for sidebar */}
+                  <div className="lg:pl-20">
                     {/* Emergency Alerts Banner */}
                     {emergencyAlerts.length > 0 && (
                       <EmergencyAlert alerts={emergencyAlerts} onClose={(id) => 
@@ -118,6 +121,7 @@ function AppContent() {
                       <Route path="/epimetrics" element={<Epimetrics />} />
                       <Route path="/ashioto" element={<Ashioto />} />
                       <Route path="/annadan" element={<Annadan />} />
+                      <Route path="/crowd-steering-mobile" element={<CrowdSteeringMobile />} />
                     </Routes>
 
                     <Footer />
