@@ -1,327 +1,123 @@
 const express = require('express');
 const router = express.Router();
+const MedicalEmergency = require('../models/MedicalEmergency');
+const MedicalFacility = require('../models/MedicalFacility');
 
-// Medical facilities data
-const medicalFacilities = [
-  { id: 1, name: 'Main Medical Camp', type: 'hospital', lat: 25.4358, lng: 81.8463, 
-    beds: 100, available: 45, doctors: 15, ambulances: 5, contact: '+91-9876543210' },
-  { id: 2, name: 'Emergency Center Sector 1', type: 'emergency', lat: 25.4198, lng: 81.8343,
-    beds: 50, available: 20, doctors: 8, ambulances: 3, contact: '+91-9876543211' },
-  { id: 3, name: 'First Aid Station A', type: 'first-aid', lat: 25.4288, lng: 81.8403,
-    beds: 20, available: 15, doctors: 4, ambulances: 1, contact: '+91-9876543212' },
-  { id: 4, name: 'First Aid Station B', type: 'first-aid', lat: 25.4428, lng: 81.8523,
-    beds: 20, available: 12, doctors: 4, ambulances: 1, contact: '+91-9876543213' },
-  { id: 5, name: 'Mobile Medical Unit 1', type: 'mobile', lat: 25.4518, lng: 81.8583,
-    beds: 10, available: 8, doctors: 2, ambulances: 2, contact: '+91-9876543214' },
-  { id: 6, name: 'Trauma Center', type: 'trauma', lat: 25.4258, lng: 81.8583,
-    beds: 75, available: 30, doctors: 12, ambulances: 4, contact: '+91-9876543215' },
-  { id: 7, name: 'Pharmacy & Medicine Dispensary', type: 'pharmacy', lat: 25.4398, lng: 81.8343,
-    beds: 0, available: 0, doctors: 2, ambulances: 0, contact: '+91-9876543216' },
-  { id: 8, name: 'Ayurvedic Health Center', type: 'ayurvedic', lat: 25.4338, lng: 81.8403,
-    beds: 30, available: 20, doctors: 5, ambulances: 0, contact: '+91-9876543217' }
-];
-
-// Emergency requests storage
-let emergencyRequests = [];
-let requestIdCounter = 1;
-
-// Ambulance fleet
-let ambulances = [
-  { id: 'AMB-001', status: 'available', currentLat: 25.4358, currentLng: 81.8463, facility: 'Main Medical Camp', type: 'Advanced Life Support', equipment: ['Ventilator', 'Defibrillator', 'ECG'] },
-  { id: 'AMB-002', status: 'available', currentLat: 25.4198, currentLng: 81.8343, facility: 'Emergency Center Sector 1', type: 'Basic Life Support', equipment: ['Oxygen', 'First Aid'] },
-  { id: 'AMB-003', status: 'available', currentLat: 25.4428, currentLng: 81.8523, facility: 'First Aid Station B', type: 'Basic Life Support', equipment: ['Oxygen', 'First Aid'] },
-  { id: 'AMB-004', status: 'available', currentLat: 25.4258, currentLng: 81.8583, facility: 'Trauma Center', type: 'Advanced Life Support', equipment: ['Ventilator', 'Defibrillator', 'ECG', 'Trauma Kit'] },
-  { id: 'AMB-005', status: 'available', currentLat: 25.4518, currentLng: 81.8583, facility: 'Mobile Medical Unit 1', type: 'Basic Life Support', equipment: ['Oxygen', 'First Aid'] },
-  // Private ambulances for Nashik
-  { id: 'PVT-001', status: 'available', currentLat: 19.9975, currentLng: 73.7898, facility: 'Private Medical Services Nashik', type: 'Advanced Life Support', equipment: ['Ventilator', 'Defibrillator'], isPrivate: true },
-  { id: 'PVT-002', status: 'available', currentLat: 19.9975, currentLng: 73.7898, facility: 'Private Ambulance Nashik', type: 'Basic Life Support', equipment: ['Oxygen'], isPrivate: true }
-];
-
-// Medicine Inventory
-let medicineInventory = [
-  { id: 1, name: 'Paracetamol', category: 'Pain Relief', stock: 5000, threshold: 1000, unit: 'tablets', location: 'Main Medical Camp', expiryDate: '2027-12-31' },
-  { id: 2, name: 'Ibuprofen', category: 'Pain Relief', stock: 3500, threshold: 800, unit: 'tablets', location: 'Main Medical Camp', expiryDate: '2027-10-15' },
-  { id: 3, name: 'ORS (Oral Rehydration Salts)', category: 'Hydration', stock: 8000, threshold: 2000, unit: 'packets', location: 'All Facilities', expiryDate: '2028-03-20' },
-  { id: 4, name: 'Bandages', category: 'First Aid', stock: 2000, threshold: 500, unit: 'rolls', location: 'All Facilities', expiryDate: 'N/A' },
-  { id: 5, name: 'Antiseptic Solution', category: 'First Aid', stock: 1500, threshold: 300, unit: 'bottles', location: 'All Facilities', expiryDate: '2027-08-30' },
-  { id: 6, name: 'Antibiotics (Amoxicillin)', category: 'Antibiotics', stock: 2500, threshold: 500, unit: 'tablets', location: 'Main Medical Camp', expiryDate: '2027-11-25' },
-  { id: 7, name: 'Anti-diarrheal', category: 'Gastro', stock: 4000, threshold: 1000, unit: 'tablets', location: 'All Facilities', expiryDate: '2028-01-10' },
-  { id: 8, name: 'Insulin', category: 'Diabetes', stock: 500, threshold: 100, unit: 'vials', location: 'Main Medical Camp', expiryDate: '2026-06-15' },
-  { id: 9, name: 'IV Fluids', category: 'Hydration', stock: 3000, threshold: 800, unit: 'bags', location: 'Hospital & Trauma', expiryDate: '2027-09-20' },
-  { id: 10, name: 'Oxygen Cylinders', category: 'Emergency', stock: 150, threshold: 30, unit: 'cylinders', location: 'All Major Facilities', expiryDate: 'N/A' }
-];
-
-// First Aid Guides
-const firstAidGuides = [
-  {
-    id: 1,
-    title: 'Heat Stroke',
-    severity: 'critical',
-    symptoms: ['High body temperature', 'Confusion', 'Rapid pulse', 'Hot, dry skin'],
-    steps: [
-      'Move person to shade or cool area immediately',
-      'Remove excess clothing',
-      'Cool the person with water or wet cloth',
-      'Fan the person',
-      'Give cool water if conscious',
-      'Call for medical help immediately'
-    ],
-    prevention: ['Stay hydrated', 'Avoid direct sun during peak hours', 'Wear light clothing']
-  },
-  {
-    id: 2,
-    title: 'Dehydration',
-    severity: 'high',
-    symptoms: ['Excessive thirst', 'Dry mouth', 'Fatigue', 'Dizziness', 'Dark urine'],
-    steps: [
-      'Move to shade',
-      'Give ORS (Oral Rehydration Solution)',
-      'Sip water slowly and continuously',
-      'Rest completely',
-      'Seek medical help if severe'
-    ],
-    prevention: ['Drink water regularly', 'Carry ORS packets', 'Avoid caffeine and alcohol']
-  },
-  {
-    id: 3,
-    title: 'Minor Cuts and Wounds',
-    severity: 'low',
-    symptoms: ['Bleeding', 'Pain', 'Visible wound'],
-    steps: [
-      'Wash hands before treating',
-      'Clean wound with clean water',
-      'Apply antiseptic',
-      'Apply pressure if bleeding',
-      'Cover with sterile bandage',
-      'Change dressing daily'
-    ],
-    prevention: ['Wear proper footwear', 'Be careful in crowded areas', 'Keep first aid kit handy']
-  },
-  {
-    id: 4,
-    title: 'Crowd Crush / Stampede Injury',
-    severity: 'critical',
-    symptoms: ['Difficulty breathing', 'Chest pain', 'Bruising', 'Unconsciousness'],
-    steps: [
-      'Call emergency services immediately',
-      'Move person to safe, open area if possible',
-      'Check breathing and pulse',
-      'Perform CPR if trained and necessary',
-      'Do not move if spinal injury suspected',
-      'Keep person calm and still'
-    ],
-    prevention: ['Avoid crowded areas', 'Stay near exits', 'Follow crowd management instructions']
-  },
-  {
-    id: 5,
-    title: 'Food Poisoning',
-    severity: 'medium',
-    symptoms: ['Nausea', 'Vomiting', 'Diarrhea', 'Stomach cramps', 'Fever'],
-    steps: [
-      'Keep person hydrated with ORS',
-      'Rest completely',
-      'Avoid solid food initially',
-      'Take anti-diarrheal medicine if available',
-      'Seek medical help if symptoms persist',
-      'Monitor for dehydration signs'
-    ],
-    prevention: ['Eat from clean, hygienic sources', 'Drink bottled or boiled water', 'Avoid street food']
-  }
-];
-
-// Bed Availability Tracking (real-time)
-let bedAvailability = {
-  totalBeds: 305,
-  occupied: 160,
-  available: 145,
-  reserved: 50,
-  icuBeds: { total: 30, available: 12 },
-  emergencyBeds: { total: 50, available: 28 },
-  generalBeds: { total: 225, available: 105 },
-  lastUpdated: new Date().toISOString()
-};
-
-// Request emergency medical assistance
-router.post('/emergency', (req, res) => {
+// Submit emergency request
+router.post('/emergency', async (req, res) => {
   try {
     const {
       patientName,
       age,
       gender,
       condition,
-      severity, // critical, high, medium, low
-      location,
-      lat,
-      lng,
       symptoms,
+      severity,
+      location,
       contactNumber,
-      reportedBy
+      alternateContact,
+      reportedBy,
+      latitude,
+      longitude
     } = req.body;
 
-    if (!location || !contactNumber || !condition) {
+    if (!patientName || !age || !condition || !location || !contactNumber) {
       return res.status(400).json({
         success: false,
-        message: 'Location, contact number, and condition are required'
+        message: 'Required fields: patientName, age, condition, location, contactNumber'
       });
     }
 
-    const emergency = {
-      id: requestIdCounter++,
-      patientName: patientName || 'Unknown',
-      age: age || 'Unknown',
-      gender: gender || 'Unknown',
+    const emergency = new MedicalEmergency({
+      reportedBy: reportedBy || null,
+      patientName,
+      age,
+      gender,
       condition,
+      symptoms,
       severity: severity || 'medium',
-      location,
-      lat: lat || null,
-      lng: lng || null,
-      symptoms: symptoms || '',
+      status: 'pending',
+      location: {
+        address: location,
+        coordinates: latitude && longitude ? {
+          type: 'Point',
+          coordinates: [longitude, latitude]
+        } : undefined
+      },
       contactNumber,
-      reportedBy: reportedBy || 'Self',
-      requestTime: new Date().toISOString(),
-      status: 'pending', // pending, dispatched, in-transit, reached, completed
-      assignedAmbulance: null,
-      estimatedArrival: null,
-      responseTime: null
-    };
+      alternateContact
+    });
 
-    // Find nearest available ambulance
-    const nearestAmbulance = findNearestAmbulance(lat, lng);
-    
-    if (nearestAmbulance) {
-      nearestAmbulance.status = 'dispatched';
-      emergency.assignedAmbulance = nearestAmbulance.id;
-      emergency.status = 'dispatched';
-      emergency.estimatedArrival = calculateETA(nearestAmbulance, lat, lng);
-      emergency.responseTime = new Date().toISOString();
-    }
-
-    emergencyRequests.push(emergency);
+    await emergency.save();
 
     // Find nearest medical facility
-    const nearestFacility = findNearestFacility(lat, lng, severity);
-
-    res.json({
-      success: true,
-      message: 'Emergency request registered successfully',
-      data: {
-        request: emergency,
-        ambulance: nearestAmbulance || null,
-        nearestFacility: nearestFacility || null,
-        helpline: '108' // Emergency helpline number
+    if (latitude && longitude) {
+      const nearestFacility = await findNearestFacility(longitude, latitude);
+      if (nearestFacility) {
+        emergency.assignedTo = { facility: nearestFacility._id };
+        await emergency.save();
       }
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error processing emergency request',
-      error: error.message
-    });
-  }
-});
-
-// Get all medical facilities
-router.get('/facilities', (req, res) => {
-  try {
-    const { type, hasAvailableBeds } = req.query;
-    
-    let filtered = [...medicalFacilities];
-
-    if (type) {
-      filtered = filtered.filter(f => f.type === type);
-    }
-    
-    if (hasAvailableBeds === 'true') {
-      filtered = filtered.filter(f => f.available > 0);
     }
 
     res.json({
       success: true,
-      count: filtered.length,
-      data: filtered
+      message: 'Emergency request submitted successfully',
+      data: emergency
     });
   } catch (error) {
+    console.error('Error submitting emergency:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching medical facilities',
+      message: 'Error submitting emergency request',
       error: error.message
     });
   }
 });
 
-// Get nearest medical facility
-router.post('/facilities/nearest', (req, res) => {
+// Get all emergencies
+router.get('/emergencies', async (req, res) => {
   try {
-    const { lat, lng, type, severity } = req.body;
+    const { status, severity, limit = 50, skip = 0 } = req.query;
+    
+    const query = {};
+    if (status) query.status = status;
+    if (severity) query.severity = severity;
 
-    if (!lat || !lng) {
-      return res.status(400).json({
-        success: false,
-        message: 'Latitude and longitude are required'
-      });
-    }
+    const emergencies = await MedicalEmergency.find(query)
+      .populate('reportedBy', 'name email')
+      .populate('assignedTo.facility')
+      .sort({ 'responseTime.reported': -1 })
+      .limit(parseInt(limit))
+      .skip(parseInt(skip));
 
-    const nearest = findNearestFacility(lat, lng, severity, type);
-
-    if (!nearest) {
-      return res.status(404).json({
-        success: false,
-        message: 'No medical facilities found nearby'
-      });
-    }
+    const total = await MedicalEmergency.countDocuments(query);
 
     res.json({
       success: true,
-      data: nearest
+      data: emergencies,
+      total
     });
   } catch (error) {
+    console.error('Error fetching emergencies:', error);
     res.status(500).json({
       success: false,
-      message: 'Error finding nearest facility',
+      message: 'Error fetching emergencies',
       error: error.message
     });
   }
 });
 
-// Get all emergency requests
-router.get('/emergencies', (req, res) => {
+// Get single emergency
+router.get('/emergency/:id', async (req, res) => {
   try {
-    const { status, severity } = req.query;
-    
-    let filtered = [...emergencyRequests];
-
-    if (status) {
-      filtered = filtered.filter(e => e.status === status);
-    }
-    
-    if (severity) {
-      filtered = filtered.filter(e => e.severity === severity);
-    }
-
-    res.json({
-      success: true,
-      count: filtered.length,
-      data: filtered.sort((a, b) => new Date(b.requestTime) - new Date(a.requestTime))
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching emergency requests',
-      error: error.message
-    });
-  }
-});
-
-// Get specific emergency request
-router.get('/emergencies/:id', (req, res) => {
-  try {
-    const { id } = req.params;
-    const emergency = emergencyRequests.find(e => e.id === parseInt(id));
+    const emergency = await MedicalEmergency.findById(req.params.id)
+      .populate('reportedBy', 'name email phone')
+      .populate('assignedTo.facility');
 
     if (!emergency) {
       return res.status(404).json({
         success: false,
-        message: 'Emergency request not found'
+        message: 'Emergency not found'
       });
     }
 
@@ -330,49 +126,51 @@ router.get('/emergencies/:id', (req, res) => {
       data: emergency
     });
   } catch (error) {
+    console.error('Error fetching emergency:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching emergency request',
+      message: 'Error fetching emergency',
       error: error.message
     });
   }
 });
 
 // Update emergency status
-router.put('/emergencies/:id/status', (req, res) => {
+router.patch('/emergency/:id/status', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { status, notes } = req.body;
-    
-    const emergency = emergencyRequests.find(e => e.id === parseInt(id));
+    const { status } = req.body;
+
+    const updateData = { status };
+    const currentTime = new Date();
+
+    if (status === 'dispatched' && !req.body.dispatched) {
+      updateData['responseTime.dispatched'] = currentTime;
+    } else if (status === 'treating' && !req.body.arrived) {
+      updateData['responseTime.arrived'] = currentTime;
+    } else if (status === 'resolved' && !req.body.resolved) {
+      updateData['responseTime.resolved'] = currentTime;
+    }
+
+    const emergency = await MedicalEmergency.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    ).populate('assignedTo.facility');
 
     if (!emergency) {
       return res.status(404).json({
         success: false,
-        message: 'Emergency request not found'
+        message: 'Emergency not found'
       });
-    }
-
-    emergency.status = status;
-    emergency.lastUpdated = new Date().toISOString();
-    
-    if (notes) {
-      emergency.notes = notes;
-    }
-
-    if (status === 'completed' && emergency.assignedAmbulance) {
-      const ambulance = ambulances.find(a => a.id === emergency.assignedAmbulance);
-      if (ambulance) {
-        ambulance.status = 'available';
-      }
     }
 
     res.json({
       success: true,
-      message: 'Emergency status updated',
+      message: 'Emergency status updated successfully',
       data: emergency
     });
   } catch (error) {
+    console.error('Error updating emergency status:', error);
     res.status(500).json({
       success: false,
       message: 'Error updating emergency status',
@@ -381,397 +179,292 @@ router.put('/emergencies/:id/status', (req, res) => {
   }
 });
 
-// Get ambulance status
-router.get('/ambulances', (req, res) => {
+// Add note to emergency
+router.post('/emergency/:id/note', async (req, res) => {
   try {
-    const { status } = req.query;
-    
-    let filtered = [...ambulances];
+    const { text, addedBy } = req.body;
 
-    if (status) {
-      filtered = filtered.filter(a => a.status === status);
+    const emergency = await MedicalEmergency.findByIdAndUpdate(
+      req.params.id,
+      {
+        $push: {
+          notes: {
+            text,
+            addedBy,
+            timestamp: new Date()
+          }
+        }
+      },
+      { new: true }
+    );
+
+    if (!emergency) {
+      return res.status(404).json({
+        success: false,
+        message: 'Emergency not found'
+      });
     }
 
     res.json({
       success: true,
-      count: filtered.length,
-      data: filtered
+      message: 'Note added successfully',
+      data: emergency
     });
   } catch (error) {
+    console.error('Error adding note:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching ambulance data',
+      message: 'Error adding note',
+      error: error.message
+    });
+  }
+});
+
+// Get all medical facilities
+router.get('/facilities', async (req, res) => {
+  try {
+    const { type, status, city } = req.query;
+    
+    const query = { isActive: true };
+    if (type) query.type = type;
+    if (status) query.status = status;
+    if (city) query['location.city'] = city;
+
+    const facilities = await MedicalFacility.find(query).sort({ name: 1 });
+
+    res.json({
+      success: true,
+      data: facilities
+    });
+  } catch (error) {
+    console.error('Error fetching facilities:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching medical facilities',
+      error: error.message
+    });
+  }
+});
+
+// Get single facility
+router.get('/facility/:id', async (req, res) => {
+  try {
+    const facility = await MedicalFacility.findById(req.params.id);
+
+    if (!facility) {
+      return res.status(404).json({
+        success: false,
+        message: 'Facility not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: facility
+    });
+  } catch (error) {
+    console.error('Error fetching facility:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching facility',
+      error: error.message
+    });
+  }
+});
+
+// Create/Update medical facility
+router.post('/facility', async (req, res) => {
+  try {
+    const facilityData = req.body;
+
+    const facility = new MedicalFacility(facilityData);
+    await facility.save();
+
+    res.json({
+      success: true,
+      message: 'Medical facility created successfully',
+      data: facility
+    });
+  } catch (error) {
+    console.error('Error creating facility:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating medical facility',
+      error: error.message
+    });
+  }
+});
+
+// Update facility capacity
+router.patch('/facility/:id/capacity', async (req, res) => {
+  try {
+    const { available, icu, general } = req.body;
+
+    const facility = await MedicalFacility.findByIdAndUpdate(
+      req.params.id,
+      {
+        'capacity.available': available,
+        'capacity.icu': icu,
+        'capacity.general': general,
+        lastUpdated: new Date()
+      },
+      { new: true }
+    );
+
+    if (!facility) {
+      return res.status(404).json({
+        success: false,
+        message: 'Facility not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Facility capacity updated',
+      data: facility
+    });
+  } catch (error) {
+    console.error('Error updating facility capacity:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating facility capacity',
+      error: error.message
+    });
+  }
+});
+
+// Get nearby facilities
+router.get('/facilities/nearby', async (req, res) => {
+  try {
+    const { latitude, longitude, maxDistance = 5000, type } = req.query;
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({
+        success: false,
+        message: 'Latitude and longitude are required'
+      });
+    }
+
+    const query = {
+      isActive: true,
+      'location.coordinates': {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [parseFloat(longitude), parseFloat(latitude)]
+          },
+          $maxDistance: parseInt(maxDistance)
+        }
+      }
+    };
+
+    if (type) query.type = type;
+
+    const facilities = await MedicalFacility.find(query).limit(10);
+
+    res.json({
+      success: true,
+      data: facilities,
+      count: facilities.length
+    });
+  } catch (error) {
+    console.error('Error fetching nearby facilities:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching nearby facilities',
       error: error.message
     });
   }
 });
 
 // Get medical statistics
-router.get('/stats', (req, res) => {
+router.get('/stats', async (req, res) => {
   try {
-    const stats = {
-      totalFacilities: medicalFacilities.length,
-      totalBeds: medicalFacilities.reduce((sum, f) => sum + f.beds, 0),
-      availableBeds: medicalFacilities.reduce((sum, f) => sum + f.available, 0),
-      totalDoctors: medicalFacilities.reduce((sum, f) => sum + f.doctors, 0),
-      totalAmbulances: ambulances.length,
-      availableAmbulances: ambulances.filter(a => a.status === 'available').length,
-      activeEmergencies: emergencyRequests.filter(e => 
-        ['pending', 'dispatched', 'in-transit', 'reached'].includes(e.status)
-      ).length,
-      totalEmergencies: emergencyRequests.length,
-      criticalCases: emergencyRequests.filter(e => 
-        e.severity === 'critical' && e.status !== 'completed'
-      ).length,
-      averageResponseTime: calculateAverageResponseTime(),
-      recentEmergencies: emergencyRequests.slice(-10).reverse()
-    };
+    const [
+      totalEmergencies,
+      pendingEmergencies,
+      resolvedEmergencies,
+      criticalCases,
+      totalFacilities,
+      availableBeds
+    ] = await Promise.all([
+      MedicalEmergency.countDocuments(),
+      MedicalEmergency.countDocuments({ status: 'pending' }),
+      MedicalEmergency.countDocuments({ status: 'resolved' }),
+      MedicalEmergency.countDocuments({ severity: 'critical', status: { $ne: 'resolved' } }),
+      MedicalFacility.countDocuments({ isActive: true }),
+      MedicalFacility.aggregate([
+        { $match: { isActive: true } },
+        { $group: { _id: null, total: { $sum: '$capacity.available' } } }
+      ])
+    ]);
 
-    res.json({
-      success: true,
-      data: stats
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching medical statistics',
-      error: error.message
-    });
-  }
-});
-
-// Get health advisories
-router.get('/advisories', (req, res) => {
-  try {
-    const advisories = [
+    const avgResponseTime = await MedicalEmergency.aggregate([
       {
-        id: 1,
-        title: 'Heatstroke Prevention',
-        severity: 'high',
-        message: 'Stay hydrated and avoid direct sunlight during peak hours (12 PM - 3 PM)',
-        category: 'heat',
-        timestamp: new Date().toISOString()
+        $match: {
+          'responseTime.dispatched': { $exists: true },
+          'responseTime.arrived': { $exists: true }
+        }
       },
       {
-        id: 2,
-        title: 'COVID-19 Precautions',
-        severity: 'medium',
-        message: 'Wear masks in crowded areas and maintain social distancing',
-        category: 'pandemic',
-        timestamp: new Date().toISOString()
+        $project: {
+          responseTime: {
+            $subtract: ['$responseTime.arrived', '$responseTime.dispatched']
+          }
+        }
       },
       {
-        id: 3,
-        title: 'Food Safety',
-        severity: 'medium',
-        message: 'Consume food only from authorized vendors. Avoid stale or uncovered food',
-        category: 'hygiene',
-        timestamp: new Date().toISOString()
-      },
-      {
-        id: 4,
-        title: 'Emergency Numbers',
-        severity: 'info',
-        message: 'Medical Emergency: 108 | Police: 100 | Fire: 101',
-        category: 'information',
-        timestamp: new Date().toISOString()
+        $group: {
+          _id: null,
+          avgTime: { $avg: '$responseTime' }
+        }
       }
-    ];
+    ]);
 
     res.json({
       success: true,
-      count: advisories.length,
-      data: advisories
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching health advisories',
-      error: error.message
-    });
-  }
-});
-
-// Helper functions
-function findNearestAmbulance(lat, lng) {
-  const available = ambulances.filter(a => a.status === 'available');
-  
-  if (available.length === 0) return null;
-  
-  let nearest = available[0];
-  let minDistance = calculateDistance(lat, lng, nearest.currentLat, nearest.currentLng);
-  
-  for (let i = 1; i < available.length; i++) {
-    const distance = calculateDistance(lat, lng, available[i].currentLat, available[i].currentLng);
-    if (distance < minDistance) {
-      minDistance = distance;
-      nearest = available[i];
-    }
-  }
-  
-  return nearest;
-}
-
-function findNearestFacility(lat, lng, severity, type = null) {
-  let facilities = [...medicalFacilities];
-  
-  // Filter by type if specified
-  if (type) {
-    facilities = facilities.filter(f => f.type === type);
-  }
-  
-  // For critical cases, prioritize hospitals and trauma centers
-  if (severity === 'critical') {
-    const critical = facilities.filter(f => f.type === 'hospital' || f.type === 'trauma' || f.type === 'emergency');
-    if (critical.length > 0) {
-      facilities = critical;
-    }
-  }
-  
-  // Filter facilities with available capacity
-  facilities = facilities.filter(f => f.available > 0 || f.type === 'pharmacy' || f.type === 'first-aid');
-  
-  if (facilities.length === 0) return null;
-  
-  let nearest = facilities[0];
-  let minDistance = calculateDistance(lat, lng, nearest.lat, nearest.lng);
-  
-  for (let i = 1; i < facilities.length; i++) {
-    const distance = calculateDistance(lat, lng, facilities[i].lat, facilities[i].lng);
-    if (distance < minDistance) {
-      minDistance = distance;
-      nearest = facilities[i];
-    }
-  }
-  
-  return { ...nearest, distance: minDistance.toFixed(2) };
-}
-
-function calculateDistance(lat1, lng1, lat2, lng2) {
-  // Haversine formula for distance calculation
-  const R = 6371; // Earth's radius in km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-function calculateETA(ambulance, targetLat, targetLng) {
-  const distance = calculateDistance(ambulance.currentLat, ambulance.currentLng, targetLat, targetLng);
-  const avgSpeed = 30; // km/h in crowded conditions
-  const minutes = Math.ceil((distance / avgSpeed) * 60);
-  return `${minutes} minutes`;
-}
-
-function calculateAverageResponseTime() {
-  const completed = emergencyRequests.filter(e => e.responseTime);
-  if (completed.length === 0) return 'N/A';
-  
-  const totalMinutes = completed.reduce((sum, e) => {
-    const requested = new Date(e.requestTime);
-    const responded = new Date(e.responseTime);
-    return sum + ((responded - requested) / 1000 / 60);
-  }, 0);
-  
-  return `${Math.round(totalMinutes / completed.length)} minutes`;
-}
-
-// MEDI-TRACKER ENDPOINTS
-
-// Get bed availability
-router.get('/bed-availability', (req, res) => {
-  try {
-    // Simulate real-time updates
-    bedAvailability.lastUpdated = new Date().toISOString();
-    
-    res.json({
-      success: true,
-      data: bedAvailability,
-      facilitiesBreakdown: medicalFacilities.map(f => ({
-        name: f.name,
-        totalBeds: f.beds,
-        available: f.available,
-        occupancy: f.beds > 0 ? Math.round(((f.beds - f.available) / f.beds) * 100) : 0
-      }))
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching bed availability',
-      error: error.message
-    });
-  }
-});
-
-// Get medicine inventory
-router.get('/medicine-inventory', (req, res) => {
-  try {
-    const { category, lowStock } = req.query;
-    
-    let inventory = [...medicineInventory];
-    
-    if (category) {
-      inventory = inventory.filter(m => m.category.toLowerCase() === category.toLowerCase());
-    }
-    
-    if (lowStock === 'true') {
-      inventory = inventory.filter(m => m.stock <= m.threshold);
-    }
-    
-    const categories = [...new Set(medicineInventory.map(m => m.category))];
-    const lowStockItems = medicineInventory.filter(m => m.stock <= m.threshold).length;
-    
-    res.json({
-      success: true,
-      count: inventory.length,
-      data: inventory,
-      summary: {
-        totalItems: medicineInventory.length,
-        categories: categories,
-        lowStockAlerts: lowStockItems
+      data: {
+        totalEmergencies,
+        pendingEmergencies,
+        resolvedEmergencies,
+        criticalCases,
+        totalFacilities,
+        availableBeds: availableBeds[0]?.total || 0,
+        avgResponseTimeMinutes: avgResponseTime[0] ? Math.round(avgResponseTime[0].avgTime / 60000) : 0
       }
     });
   } catch (error) {
+    console.error('Error fetching statistics:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching medicine inventory',
+      message: 'Error fetching statistics',
       error: error.message
     });
   }
 });
 
-// Update medicine stock
-router.patch('/medicine-inventory/:id', (req, res) => {
+// Helper function to find nearest facility
+async function findNearestFacility(longitude, latitude) {
   try {
-    const { id } = req.params;
-    const { stock, action } = req.body; // action: 'add' or 'consume'
-    
-    const medicine = medicineInventory.find(m => m.id === parseInt(id));
-    
-    if (!medicine) {
-      return res.status(404).json({
-        success: false,
-        message: 'Medicine not found'
-      });
-    }
-    
-    if (action === 'add') {
-      medicine.stock += stock;
-    } else if (action === 'consume') {
-      medicine.stock = Math.max(0, medicine.stock - stock);
-    } else {
-      medicine.stock = stock;
-    }
-    
-    res.json({
-      success: true,
-      message: 'Medicine stock updated',
-      data: medicine,
-      alert: medicine.stock <= medicine.threshold ? 'Low stock alert!' : null
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error updating medicine stock',
-      error: error.message
-    });
-  }
-});
+    const facilities = await MedicalFacility.find({
+      isActive: true,
+      status: { $nin: ['full', 'closed'] },
+      'location.coordinates.coordinates': {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [longitude, latitude]
+          },
+          $maxDistance: 10000 // 10km
+        }
+      }
+    }).limit(1);
 
-// Get first aid guides
-router.get('/first-aid-guides', (req, res) => {
-  try {
-    const { severity } = req.query;
-    
-    let guides = [...firstAidGuides];
-    
-    if (severity) {
-      guides = guides.filter(g => g.severity === severity);
-    }
-    
-    res.json({
-      success: true,
-      count: guides.length,
-      data: guides
-    });
+    return facilities[0] || null;
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching first aid guides',
-      error: error.message
-    });
+    console.error('Error finding nearest facility:', error);
+    return null;
   }
-});
-
-// Get specific first aid guide
-router.get('/first-aid-guides/:id', (req, res) => {
-  try {
-    const { id } = req.params;
-    const guide = firstAidGuides.find(g => g.id === parseInt(id));
-    
-    if (!guide) {
-      return res.status(404).json({
-        success: false,
-        message: 'First aid guide not found'
-      });
-    }
-    
-    res.json({
-      success: true,
-      data: guide
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching first aid guide',
-      error: error.message
-    });
-  }
-});
-
-// Get all ambulances with real-time tracking
-router.get('/ambulances', (req, res) => {
-  try {
-    const { status, type, isPrivate } = req.query;
-    
-    let ambulanceList = [...ambulances];
-    
-    if (status) {
-      ambulanceList = ambulanceList.filter(a => a.status === status);
-    }
-    
-    if (type) {
-      ambulanceList = ambulanceList.filter(a => a.type === type);
-    }
-    
-    if (isPrivate !== undefined) {
-      ambulanceList = ambulanceList.filter(a => a.isPrivate === (isPrivate === 'true'));
-    }
-    
-    const stats = {
-      total: ambulances.length,
-      available: ambulances.filter(a => a.status === 'available').length,
-      dispatched: ambulances.filter(a => a.status === 'dispatched').length,
-      government: ambulances.filter(a => !a.isPrivate).length,
-      private: ambulances.filter(a => a.isPrivate).length
-    };
-    
-    res.json({
-      success: true,
-      count: ambulanceList.length,
-      data: ambulanceList,
-      stats: stats
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching ambulances',
-      error: error.message
-    });
-  }
-});
+}
 
 module.exports = router;

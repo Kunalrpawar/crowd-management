@@ -24,25 +24,78 @@ const CrowdHeatmap = () => {
   const center = kumbhLocations[selectedLocation].coords;
 
   useEffect(() => {
-    // Simulate crowd data for demo
-    const generateCrowdData = () => {
-      const zones = [
-        { id: 1, name: 'Sangam Nose', lat: 25.4358, lng: 81.8463, density: Math.random(), people: Math.floor(Math.random() * 50000) + 10000 },
-        { id: 2, name: 'Triveni Ghat', lat: 25.4288, lng: 81.8403, density: Math.random(), people: Math.floor(Math.random() * 40000) + 8000 },
-        { id: 3, name: 'Parade Ground', lat: 25.4428, lng: 81.8523, density: Math.random(), people: Math.floor(Math.random() * 35000) + 7000 },
-        { id: 4, name: 'Sector 1', lat: 25.4198, lng: 81.8343, density: Math.random(), people: Math.floor(Math.random() * 30000) + 6000 },
-        { id: 5, name: 'Sector 2', lat: 25.4518, lng: 81.8583, density: Math.random(), people: Math.floor(Math.random() * 28000) + 5500 },
-        { id: 6, name: 'Sector 3', lat: 25.4258, lng: 81.8583, density: Math.random(), people: Math.floor(Math.random() * 25000) + 5000 },
-        { id: 7, name: 'Akshayavat', lat: 25.4398, lng: 81.8343, density: Math.random(), people: Math.floor(Math.random() * 22000) + 4500 },
-        { id: 8, name: 'Saraswati Ghat', lat: 25.4338, lng: 81.8403, density: Math.random(), people: Math.floor(Math.random() * 20000) + 4000 }
-      ];
+    // Initialize crowd data with more stable values
+    const initializeCrowdData = () => {
+      const locationOffsets = {
+        prayagraj: [
+          { name: 'Sangam Nose', offset: [0, 0], baseDensity: 0.65 },
+          { name: 'Triveni Ghat', offset: [-0.007, -0.006], baseDensity: 0.45 },
+          { name: 'Parade Ground', offset: [0.007, 0.006], baseDensity: 0.35 },
+          { name: 'Sector 1', offset: [-0.016, -0.012], baseDensity: 0.25 },
+          { name: 'Sector 2', offset: [0.016, 0.012], baseDensity: 0.30 },
+          { name: 'Sector 3', offset: [-0.010, 0.012], baseDensity: 0.28 },
+          { name: 'Akshayavat', offset: [0.004, -0.012], baseDensity: 0.40 },
+          { name: 'Saraswati Ghat', offset: [-0.002, -0.006], baseDensity: 0.50 }
+        ],
+        haridwar: [
+          { name: 'Har Ki Pauri', offset: [0, 0], baseDensity: 0.70 },
+          { name: 'Brahma Kund', offset: [0.005, 0.005], baseDensity: 0.55 },
+          { name: 'Gau Ghat', offset: [-0.005, 0.005], baseDensity: 0.38 },
+          { name: 'Vishnu Ghat', offset: [0.007, -0.007], baseDensity: 0.42 },
+          { name: 'Kankhal', offset: [-0.010, -0.008], baseDensity: 0.30 },
+          { name: 'Subhash Ghat', offset: [0.006, 0.008], baseDensity: 0.35 },
+          { name: 'Kushavarta Ghat', offset: [-0.008, -0.005], baseDensity: 0.48 },
+          { name: 'Birla Ghat', offset: [0.009, -0.006], baseDensity: 0.32 }
+        ],
+        nashik: [
+          { name: 'Ramkund', offset: [0, 0], baseDensity: 0.68 },
+          { name: 'Panchavati', offset: [0.008, 0.008], baseDensity: 0.52 },
+          { name: 'Sundar Narayan', offset: [-0.006, 0.006], baseDensity: 0.40 },
+          { name: 'Triveni Sangam', offset: [0.010, -0.010], baseDensity: 0.58 },
+          { name: 'Gangapur Road', offset: [-0.012, -0.012], baseDensity: 0.28 },
+          { name: 'Tapovan', offset: [0.009, 0.010], baseDensity: 0.33 },
+          { name: 'Sita Gufa', offset: [-0.008, -0.008], baseDensity: 0.36 },
+          { name: 'Kapaleshwar', offset: [0.007, -0.009], baseDensity: 0.44 }
+        ],
+        ujjain: [
+          { name: 'Ram Ghat', offset: [0, 0], baseDensity: 0.62 },
+          { name: 'Mangalnath', offset: [0.006, 0.006], baseDensity: 0.48 },
+          { name: 'Kalbhairav', offset: [-0.008, 0.007], baseDensity: 0.54 },
+          { name: 'Shipra River Bank', offset: [0.009, -0.009], baseDensity: 0.38 },
+          { name: 'Mahakaleshwar', offset: [-0.010, -0.008], baseDensity: 0.72 },
+          { name: 'Siddha Nath', offset: [0.007, 0.009], baseDensity: 0.34 },
+          { name: 'Triveni Sangam', offset: [-0.009, -0.010], baseDensity: 0.46 },
+          { name: 'Gandharva Nath', offset: [0.008, -0.007], baseDensity: 0.40 }
+        ]
+      };
+
+      const zones = locationOffsets[selectedLocation].map((zone, index) => ({
+        id: index + 1,
+        name: zone.name,
+        lat: center[0] + zone.offset[0],
+        lng: center[1] + zone.offset[1],
+        density: zone.baseDensity + (Math.random() * 0.1 - 0.05), // Small random variation
+        people: Math.floor(zone.baseDensity * 50000) + Math.floor(Math.random() * 5000)
+      }));
+
       setCrowdZones(zones);
     };
 
-    generateCrowdData();
-    const interval = setInterval(generateCrowdData, 5000);
+    // Update with very gradual changes
+    const updateCrowdData = () => {
+      setCrowdZones(prevZones => 
+        prevZones.map(zone => ({
+          ...zone,
+          density: Math.max(0.1, Math.min(0.95, zone.density + (Math.random() * 0.04 - 0.02))), // Very small gradual change
+          people: Math.max(5000, Math.min(60000, zone.people + Math.floor(Math.random() * 2000 - 1000)))
+        }))
+      );
+    };
+
+    initializeCrowdData();
+    const interval = setInterval(updateCrowdData, 60000); // Update every 60 seconds with small changes
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedLocation, center]);
 
   const getDensityColor = (density) => {
     if (density < 0.3) return { color: '#10b981', label: t('crowd.low') }; // Green

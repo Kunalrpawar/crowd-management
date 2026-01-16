@@ -30,6 +30,8 @@ import Ashioto from './components/Ashioto';
 import Annadan from './components/Annadan';
 import ChatBot from './components/ChatBot';
 import CrowdSteeringMobile from './components/CrowdSteeringMobile';
+import Profile from './components/Profile';
+import ParkingAvailability from './components/ParkingAvailability';
 
 // Context
 import { SocketContext } from './context/SocketContext';
@@ -122,6 +124,8 @@ function AppContent() {
                       <Route path="/ashioto" element={<Ashioto />} />
                       <Route path="/annadan" element={<Annadan />} />
                       <Route path="/crowd-steering-mobile" element={<CrowdSteeringMobile />} />
+                      <Route path="/parking" element={<ParkingAvailability />} />
+                      <Route path="/profile" element={<Profile />} />
                     </Routes>
 
                     <Footer />

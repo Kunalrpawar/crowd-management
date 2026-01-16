@@ -247,6 +247,16 @@ const Navbar = () => {
                         <button
                           onClick={() => {
                             setShowProfileMenu(false);
+                            navigate('/profile');
+                          }}
+                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center space-x-2"
+                        >
+                          <FaUserCircle className="text-gray-600 text-sm" />
+                          <span className="text-gray-700 font-medium text-sm">My Profile</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
                             navigate('/');
                           }}
                           className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center space-x-2"

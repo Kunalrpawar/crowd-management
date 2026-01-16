@@ -27,6 +27,8 @@ const TrackNashik = () => {
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [filterType, setFilterType] = useState('all');
   const [isParvaniDay, setIsParvaniDay] = useState(false);
+  const [crowdZones, setCrowdZones] = useState([]);
+  const [showHeatmap, setShowHeatmap] = useState(true);
 
   const kumbhLocations = {
     prayagraj: { name: 'Prayagraj (Allahabad)', coords: [25.4358, 81.8463] },
@@ -39,7 +41,11 @@ const TrackNashik = () => {
 
   useEffect(() => {
     fetchRouteData();
-    const interval = setInterval(fetchRouteData, 15000);
+    generateCrowdData();
+    const interval = setInterval(() => {
+      fetchRouteData();
+      generateCrowdData();
+    }, 15000);
     return () => clearInterval(interval);
   }, [selectedLocation, filterType]);
 
@@ -64,6 +70,62 @@ const TrackNashik = () => {
     } catch (error) {
       console.error('Error fetching route data:', error);
     }
+  };
+
+  const generateCrowdData = () => {
+    const locationOffsets = {
+      prayagraj: [
+        { name: 'Sangam Nose', offset: [0, 0] },
+        { name: 'Triveni Ghat', offset: [-0.007, -0.006] },
+        { name: 'Parade Ground', offset: [0.007, 0.006] },
+        { name: 'Sector 1', offset: [-0.016, -0.012] },
+        { name: 'Sector 2', offset: [0.016, 0.012] },
+        { name: 'Sector 3', offset: [-0.010, 0.012] }
+      ],
+      haridwar: [
+        { name: 'Har Ki Pauri', offset: [0, 0] },
+        { name: 'Brahma Kund', offset: [0.005, 0.005] },
+        { name: 'Gau Ghat', offset: [-0.005, 0.005] },
+        { name: 'Vishnu Ghat', offset: [0.007, -0.007] },
+        { name: 'Kankhal', offset: [-0.010, -0.008] }
+      ],
+      nashik: [
+        { name: 'Ramkund', offset: [0, 0] },
+        { name: 'Panchavati', offset: [0.008, 0.008] },
+        { name: 'Sundar Narayan', offset: [-0.006, 0.006] },
+        { name: 'Triveni Sangam', offset: [0.010, -0.010] },
+        { name: 'Gangapur Road', offset: [-0.012, -0.012] }
+      ],
+      ujjain: [
+        { name: 'Ram Ghat', offset: [0, 0] },
+        { name: 'Mangalnath', offset: [0.006, 0.006] },
+        { name: 'Kalbhairav', offset: [-0.008, 0.007] },
+        { name: 'Shipra River Bank', offset: [0.009, -0.009] },
+        { name: 'Mahakaleshwar', offset: [-0.010, -0.008] }
+      ]
+    };
+
+    const zones = locationOffsets[selectedLocation].map((zone, index) => ({
+      id: index + 1,
+      name: zone.name,
+      lat: center[0] + zone.offset[0],
+      lng: center[1] + zone.offset[1],
+      density: Math.random(),
+      people: Math.floor(Math.random() * 50000) + 10000
+    }));
+
+    setCrowdZones(zones);
+  };
+
+  const getDensityColor = (density) => {
+    if (density < 0.3) return { color: '#10b981', label: 'Low' };
+    if (density < 0.6) return { color: '#f59e0b', label: 'Medium' };
+    if (density < 0.8) return { color: '#f97316', label: 'High' };
+    return { color: '#ef4444', label: 'Critical' };
+  };
+
+  const getRadius = (people) => {
+    return Math.min(Math.max(people / 100, 200), 600);
   };
 
   const getRouteColor = (type) => {
@@ -163,7 +225,7 @@ const TrackNashik = () => {
         </div>
 
         {/* Parvani Day Toggle */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center gap-4 mb-6">
           <button
             onClick={toggleParvaniDay}
             className={`px-8 py-4 rounded-2xl font-bold text-white transition-all shadow-lg ${
@@ -173,6 +235,17 @@ const TrackNashik = () => {
             }`}
           >
             {isParvaniDay ? '🔴 PARVANI DAY ACTIVE - Black Routes Closed' : '⚪ Normal Day - All Routes Open'}
+          </button>
+          
+          <button
+            onClick={() => setShowHeatmap(!showHeatmap)}
+            className={`px-8 py-4 rounded-2xl font-bold text-white transition-all shadow-lg ${
+              showHeatmap
+                ? 'bg-gradient-to-r from-orange-600 to-red-600'
+                : 'bg-gradient-to-r from-gray-500 to-gray-600'
+            }`}
+          >
+            {showHeatmap ? '🔥 Crowd Heatmap ON' : '❄️ Crowd Heatmap OFF'}
           </button>
         </div>
 
@@ -309,6 +382,38 @@ const TrackNashik = () => {
                   attribution='&copy; OpenStreetMap contributors'
                 />
 
+                {/* Crowd Heatmap Circles */}
+                {showHeatmap && crowdZones.map((zone) => {
+                  const { color, label } = getDensityColor(zone.density);
+                  return (
+                    <Circle
+                      key={`crowd-${zone.id}`}
+                      center={[zone.lat, zone.lng]}
+                      radius={getRadius(zone.people)}
+                      pathOptions={{
+                        color: color,
+                        fillColor: color,
+                        fillOpacity: 0.4,
+                        weight: 2
+                      }}
+                    >
+                      <Popup>
+                        <div className="p-2">
+                          <h3 className="font-bold text-lg mb-2">{zone.name}</h3>
+                          <div className="space-y-1">
+                            <p className="text-sm">
+                              👥 People: <strong>{zone.people.toLocaleString()}</strong>
+                            </p>
+                            <p className="text-sm">
+                              ⚠️ Density: <strong>{label}</strong> ({(zone.density * 100).toFixed(0)}%)
+                            </p>
+                          </div>
+                        </div>
+                      </Popup>
+                    </Circle>
+                  );
+                })}
+
                 {/* Draw Routes */}
                 {routes.map(route => {
                   const pathCoords = [
@@ -377,23 +482,55 @@ const TrackNashik = () => {
               </MapContainer>
 
               {/* Legend */}
-              <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-                {[
-                  { type: 'snani', label: 'Bathing Route', color: '#4169E1' },
-                  { type: 'vip', label: 'VIP Route', color: '#FFD700' },
-                  { type: 'emergency', label: 'Emergency Route', color: '#FF0000' },
-                  { type: 'administrative', label: 'Administrative', color: '#8B4789' },
-                  { type: 'black', label: 'Black Route', color: '#000000' },
-                  { type: 'general', label: 'General Route', color: '#32CD32' }
-                ].map(item => (
-                  <div key={item.type} className="flex items-center gap-2">
-                    <div
-                      className="w-6 h-3 rounded"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span>{item.label}</span>
+              <div className="mt-4 space-y-3">
+                {/* Route Legend */}
+                <div>
+                  <h4 className="font-bold mb-2">Route Types</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                    {[
+                      { type: 'snani', label: 'Bathing Route', color: '#4169E1' },
+                      { type: 'vip', label: 'VIP Route', color: '#FFD700' },
+                      { type: 'emergency', label: 'Emergency Route', color: '#FF0000' },
+                      { type: 'administrative', label: 'Administrative', color: '#8B4789' },
+                      { type: 'black', label: 'Black Route', color: '#000000' },
+                      { type: 'general', label: 'General Route', color: '#32CD32' }
+                    ].map(item => (
+                      <div key={item.type} className="flex items-center gap-2">
+                        <div
+                          className="w-6 h-3 rounded"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span>{item.label}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                {/* Crowd Density Legend */}
+                {showHeatmap && (
+                  <div>
+                    <h4 className="font-bold mb-2">🔥 Crowd Density</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                      {[
+                        { color: '#10b981', label: 'Low (Safe)', range: '0-30%' },
+                        { color: '#f59e0b', label: 'Medium', range: '30-60%' },
+                        { color: '#f97316', label: 'High', range: '60-80%' },
+                        { color: '#ef4444', label: 'Critical (Danger)', range: '80-100%' }
+                      ].map((item, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <div
+                            className="w-6 h-6 rounded-full"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <div>
+                            <div className="font-medium">{item.label}</div>
+                            <div className="text-xs text-gray-500">{item.range}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

@@ -27,7 +27,7 @@ const Epimetrics = () => {
       name: 'Jaundice',
       cases: 156,
       trend: 'up',
-      location: 'Solapur',
+      location: 'Nashik',
       date: '21-29 Aug 2019',
       severity: 'high',
       color: '#FF6B6B',
@@ -90,7 +90,7 @@ const Epimetrics = () => {
       id: 2,
       type: 'medicine',
       disease: 'Jaundice',
-      location: 'Solapur District',
+      location: 'Nashik District',
       timestamp: '5 hours ago',
       severity: 'medium',
       action: 'Stock ORS and Zinc supplements'
@@ -111,7 +111,7 @@ const Epimetrics = () => {
     { name: 'Prayagraj', lat: 25.4358, lng: 81.8463, cases: 892, doctors: 1200 },
     { name: 'Haridwar', lat: 29.9457, lng: 78.1642, cases: 423, doctors: 680 },
     { name: 'Ujjain', lat: 23.1765, lng: 75.7885, cases: 334, doctors: 550 },
-    { name: 'Solapur', lat: 17.6599, lng: 75.9064, cases: 234, doctors: 320 }
+    { name: 'Nashik', lat: 19.9975, lng: 73.7898, cases: 234, doctors: 320 }
   ];
 
   const achievements = [

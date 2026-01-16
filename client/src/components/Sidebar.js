@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   FaBars, FaTimes, FaHome, FaMap, FaRoute, FaChartLine, FaVideo, 
   FaInfoCircle, FaSignOutAlt, FaUserCircle, FaHeart, FaFirstAid, 
-  FaHospital, FaMapMarkedAlt, FaCube, FaChevronDown, FaChevronUp
+  FaHospital, FaMapMarkedAlt, FaCube, FaChevronDown, FaChevronUp, FaParking
 } from 'react-icons/fa';
 import { GiIndianPalace } from 'react-icons/gi';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -45,9 +45,10 @@ const Sidebar = () => {
     { name: t('nav.heatmap'), path: '/heatmap', icon: <FaMap />, badge: null },
     { name: t('nav.safeRoute'), path: '/safe-route', icon: <FaRoute />, badge: null },
     { name: t('nav.predictions'), path: '/prediction', icon: <FaChartLine />, badge: null },
-    { name: t('nav.liveVideo'), path: '/live-feed', icon: <FaVideo />, badge: 'Live' },
+    { name: t('nav.liveVideo'), path: '/live-feed', icon: <FaVideo />, badge: null },
     { name: 'Track Nashik', path: '/track-nashik', icon: <FaMapMarkedAlt />, badge: null },
     { name: '3D Maps', path: '/maps-3d', icon: <FaCube />, badge: null },
+    { name: 'Parking Availability', path: '/parking', icon: <FaParking />, badge: 'New' },
   ];
 
   const featureItems = [
@@ -244,20 +245,22 @@ const Sidebar = () => {
                     )}
                   </AnimatePresence>
                 </div>
-              </div>
 
-              {/* Footer Actions */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
-                <div className="mb-3">
+                {/* Language Switcher */}
+                <div className="pt-4">
                   <LanguageSwitcher />
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg font-semibold hover:from-red-600 hover:to-pink-600 transition shadow-lg"
-                >
-                  <FaSignOutAlt />
-                  <span>Logout</span>
-                </button>
+
+                {/* Logout Button */}
+                <div className="pt-4 pb-20">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg font-semibold hover:from-red-600 hover:to-pink-600 transition shadow-lg"
+                  >
+                    <FaSignOutAlt />
+                    <span>Logout</span>
+                  </button>
+                </div>
               </div>
             </motion.aside>
           </>

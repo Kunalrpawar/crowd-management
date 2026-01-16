@@ -1,14 +1,9 @@
 const express = require('express');
 const router = express.Router();
-
-// In-memory storage (replace with database in production)
-let missingPersons = [];
-let foundPersons = [];
-let matchedCases = [];
-let caseIdCounter = 1;
+const LostFound = require('../models/LostFound');
 
 // Report a missing person
-router.post('/report-missing', (req, res) => {
+router.post('/report-missing', async (req, res) => {
   try {
     const {
       name,
@@ -16,12 +11,14 @@ router.post('/report-missing', (req, res) => {
       gender,
       description,
       lastSeenLocation,
-      lastSeenTime,
       contactNumber,
-      photoUrl,
+      alternateContact,
       clothingDescription,
       identificationMarks,
-      reportedBy
+      photo,
+      reportedBy,
+      latitude,
+      longitude
     } = req.body;
 
     if (!name || !contactNumber || !lastSeenLocation) {
@@ -31,29 +28,29 @@ router.post('/report-missing', (req, res) => {
       });
     }
 
-    const missingCase = {
-      id: caseIdCounter++,
+    const missingCase = new LostFound({
+      reportedBy: reportedBy || null,
+      type: 'missing',
+      status: 'active',
       name,
-      age: age || 'Unknown',
-      gender: gender || 'Unknown',
-      description: description || '',
+      age,
+      gender,
+      description,
       lastSeenLocation,
-      lastSeenTime: lastSeenTime || new Date().toISOString(),
       contactNumber,
-      photoUrl: photoUrl || '',
-      clothingDescription: clothingDescription || '',
-      identificationMarks: identificationMarks || '',
-      reportedBy: reportedBy || 'Anonymous',
-      reportedAt: new Date().toISOString(),
-      status: 'missing',
-      views: 0,
-      tips: []
-    };
+      alternateContact,
+      clothingDescription,
+      identificationMarks,
+      photo,
+      location: latitude && longitude ? {
+        type: 'Point',
+        coordinates: [longitude, latitude]
+      } : undefined
+    });
 
-    missingPersons.push(missingCase);
+    await missingCase.save();
 
-    // Check for potential matches with found persons
-    const potentialMatches = findPotentialMatches(missingCase);
+    const potentialMatches = await findPotentialMatches(missingCase);
 
     res.json({
       success: true,
@@ -64,6 +61,7 @@ router.post('/report-missing', (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Error filing missing person report:', error);
     res.status(500).json({
       success: false,
       message: 'Error filing missing person report',
@@ -73,19 +71,21 @@ router.post('/report-missing', (req, res) => {
 });
 
 // Report a found person
-router.post('/report-found', (req, res) => {
+router.post('/report-found', async (req, res) => {
   try {
     const {
       description,
       currentLocation,
-      foundTime,
       contactNumber,
-      photoUrl,
+      alternateContact,
       approximateAge,
       gender,
       clothingDescription,
       condition,
-      foundBy
+      photo,
+      reportedBy,
+      latitude,
+      longitude
     } = req.body;
 
     if (!currentLocation || !contactNumber) {
@@ -95,27 +95,28 @@ router.post('/report-found', (req, res) => {
       });
     }
 
-    const foundCase = {
-      id: caseIdCounter++,
-      description: description || '',
+    const foundCase = new LostFound({
+      reportedBy: reportedBy || null,
+      type: 'found',
+      status: 'active',
+      approximateAge,
+      gender,
+      description,
       currentLocation,
-      foundTime: foundTime || new Date().toISOString(),
       contactNumber,
-      photoUrl: photoUrl || '',
-      approximateAge: approximateAge || 'Unknown',
-      gender: gender || 'Unknown',
-      clothingDescription: clothingDescription || '',
-      condition: condition || 'Safe',
-      foundBy: foundBy || 'Anonymous',
-      reportedAt: new Date().toISOString(),
-      status: 'found',
-      claimed: false
-    };
+      alternateContact,
+      clothingDescription,
+      photo,
+      additionalInfo: condition,
+      location: latitude && longitude ? {
+        type: 'Point',
+        coordinates: [longitude, latitude]
+      } : undefined
+    });
 
-    foundPersons.push(foundCase);
+    await foundCase.save();
 
-    // Check for potential matches with missing persons
-    const potentialMatches = findMatchesForFound(foundCase);
+    const potentialMatches = await findPotentialMatchesForFound(foundCase);
 
     res.json({
       success: true,
@@ -126,6 +127,7 @@ router.post('/report-found', (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Error filing found person report:', error);
     res.status(500).json({
       success: false,
       message: 'Error filing found person report',
@@ -135,30 +137,28 @@ router.post('/report-found', (req, res) => {
 });
 
 // Get all missing persons
-router.get('/missing', (req, res) => {
+router.get('/missing', async (req, res) => {
   try {
-    const { status, location, gender } = req.query;
+    const { status = 'active', limit = 50, skip = 0 } = req.query;
     
-    let filtered = [...missingPersons];
+    const missingPersons = await LostFound.find({
+      type: 'missing',
+      ...(status && { status })
+    })
+    .populate('reportedBy', 'name email')
+    .sort({ reportedAt: -1 })
+    .limit(parseInt(limit))
+    .skip(parseInt(skip));
 
-    if (status) {
-      filtered = filtered.filter(p => p.status === status);
-    }
-    if (location) {
-      filtered = filtered.filter(p => 
-        p.lastSeenLocation.toLowerCase().includes(location.toLowerCase())
-      );
-    }
-    if (gender) {
-      filtered = filtered.filter(p => p.gender.toLowerCase() === gender.toLowerCase());
-    }
+    const total = await LostFound.countDocuments({ type: 'missing', status });
 
     res.json({
       success: true,
-      count: filtered.length,
-      data: filtered.sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt))
+      data: missingPersons,
+      total
     });
   } catch (error) {
+    console.error('Error fetching missing persons:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching missing persons',
@@ -168,30 +168,28 @@ router.get('/missing', (req, res) => {
 });
 
 // Get all found persons
-router.get('/found', (req, res) => {
+router.get('/found', async (req, res) => {
   try {
-    const { claimed, location, gender } = req.query;
+    const { status = 'active', limit = 50, skip = 0 } = req.query;
     
-    let filtered = [...foundPersons];
+    const foundPersons = await LostFound.find({
+      type: 'found',
+      ...(status && { status })
+    })
+    .populate('reportedBy', 'name email')
+    .sort({ reportedAt: -1 })
+    .limit(parseInt(limit))
+    .skip(parseInt(skip));
 
-    if (claimed !== undefined) {
-      filtered = filtered.filter(p => p.claimed === (claimed === 'true'));
-    }
-    if (location) {
-      filtered = filtered.filter(p => 
-        p.currentLocation.toLowerCase().includes(location.toLowerCase())
-      );
-    }
-    if (gender) {
-      filtered = filtered.filter(p => p.gender.toLowerCase() === gender.toLowerCase());
-    }
+    const total = await LostFound.countDocuments({ type: 'found', status });
 
     res.json({
       success: true,
-      count: filtered.length,
-      data: filtered.sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt))
+      data: foundPersons,
+      total
     });
   } catch (error) {
+    console.error('Error fetching found persons:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching found persons',
@@ -200,237 +198,104 @@ router.get('/found', (req, res) => {
   }
 });
 
-// Get specific case details
-router.get('/case/:id', (req, res) => {
+// Get case by ID
+router.get('/case/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const caseId = parseInt(id);
+    const caseData = await LostFound.findById(req.params.id)
+      .populate('reportedBy', 'name email phone')
+      .populate('matchedWith');
 
-    const missingCase = missingPersons.find(p => p.id === caseId);
-    if (missingCase) {
-      missingCase.views++;
-      return res.json({
-        success: true,
-        data: missingCase,
-        type: 'missing'
-      });
-    }
-
-    const foundCase = foundPersons.find(p => p.id === caseId);
-    if (foundCase) {
-      return res.json({
-        success: true,
-        data: foundCase,
-        type: 'found'
-      });
-    }
-
-    res.status(404).json({
-      success: false,
-      message: 'Case not found'
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching case details',
-      error: error.message
-    });
-  }
-});
-
-// Add a tip to a missing person case
-router.post('/case/:id/tip', (req, res) => {
-  try {
-    const { id } = req.params;
-    const { tipText, location, contactNumber, timestamp } = req.body;
-    const caseId = parseInt(id);
-
-    const missingCase = missingPersons.find(p => p.id === caseId);
-    if (!missingCase) {
+    if (!caseData) {
       return res.status(404).json({
         success: false,
         message: 'Case not found'
       });
     }
 
-    const tip = {
-      id: Date.now(),
-      tipText,
-      location: location || '',
-      contactNumber: contactNumber || '',
-      timestamp: timestamp || new Date().toISOString(),
-      verified: false
-    };
-
-    missingCase.tips.push(tip);
-
     res.json({
       success: true,
-      message: 'Tip added successfully',
-      data: tip
+      data: caseData
     });
   } catch (error) {
+    console.error('Error fetching case:', error);
     res.status(500).json({
       success: false,
-      message: 'Error adding tip',
+      message: 'Error fetching case',
       error: error.message
     });
   }
 });
 
-// Mark a case as resolved/reunited
-router.put('/case/:id/resolve', (req, res) => {
+// Update case status
+router.patch('/case/:id/status', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { reunificationDetails } = req.body;
-    const caseId = parseInt(id);
+    const { status, matchedWith } = req.body;
 
-    const missingCase = missingPersons.find(p => p.id === caseId);
-    if (missingCase) {
-      missingCase.status = 'reunited';
-      missingCase.reunificationDetails = reunificationDetails || '';
-      missingCase.resolvedAt = new Date().toISOString();
-      
-      matchedCases.push(missingCase);
-      
-      return res.json({
-        success: true,
-        message: 'Case marked as resolved',
-        data: missingCase
-      });
+    const updateData = { status };
+    if (status === 'resolved') {
+      updateData.resolvedAt = new Date();
+      if (matchedWith) {
+        updateData.matchedWith = matchedWith;
+      }
     }
 
-    const foundCase = foundPersons.find(p => p.id === caseId);
-    if (foundCase) {
-      foundCase.claimed = true;
-      foundCase.claimedAt = new Date().toISOString();
-      
-      return res.json({
-        success: true,
-        message: 'Found person claimed',
-        data: foundCase
-      });
-    }
+    const caseData = await LostFound.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
 
-    res.status(404).json({
-      success: false,
-      message: 'Case not found'
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error resolving case',
-      error: error.message
-    });
-  }
-});
-
-// Search across all cases
-router.get('/search', (req, res) => {
-  try {
-    const { query, age, gender, location } = req.query;
-
-    if (!query && !age && !gender && !location) {
-      return res.status(400).json({
+    if (!caseData) {
+      return res.status(404).json({
         success: false,
-        message: 'At least one search parameter is required'
+        message: 'Case not found'
       });
     }
 
-    let results = [];
-
-    // Search in missing persons
-    const missingResults = missingPersons.filter(person => {
-      let matches = true;
-      
-      if (query) {
-        const searchLower = query.toLowerCase();
-        matches = matches && (
-          person.name.toLowerCase().includes(searchLower) ||
-          person.description.toLowerCase().includes(searchLower) ||
-          person.clothingDescription.toLowerCase().includes(searchLower)
-        );
-      }
-      
-      if (age) {
-        matches = matches && (person.age.toString() === age.toString());
-      }
-      
-      if (gender) {
-        matches = matches && (person.gender.toLowerCase() === gender.toLowerCase());
-      }
-      
-      if (location) {
-        matches = matches && person.lastSeenLocation.toLowerCase().includes(location.toLowerCase());
-      }
-      
-      return matches;
-    }).map(p => ({ ...p, caseType: 'missing' }));
-
-    // Search in found persons
-    const foundResults = foundPersons.filter(person => {
-      let matches = true;
-      
-      if (query) {
-        const searchLower = query.toLowerCase();
-        matches = matches && (
-          person.description.toLowerCase().includes(searchLower) ||
-          person.clothingDescription.toLowerCase().includes(searchLower)
-        );
-      }
-      
-      if (age) {
-        matches = matches && (person.approximateAge.toString() === age.toString());
-      }
-      
-      if (gender) {
-        matches = matches && (person.gender.toLowerCase() === gender.toLowerCase());
-      }
-      
-      if (location) {
-        matches = matches && person.currentLocation.toLowerCase().includes(location.toLowerCase());
-      }
-      
-      return matches;
-    }).map(p => ({ ...p, caseType: 'found' }));
-
-    results = [...missingResults, ...foundResults];
-
     res.json({
       success: true,
-      count: results.length,
-      data: results
+      message: 'Case status updated successfully',
+      data: caseData
     });
   } catch (error) {
+    console.error('Error updating case status:', error);
     res.status(500).json({
       success: false,
-      message: 'Error searching cases',
+      message: 'Error updating case status',
       error: error.message
     });
   }
 });
 
 // Get statistics
-router.get('/stats', (req, res) => {
+router.get('/stats', async (req, res) => {
   try {
-    const stats = {
-      totalMissingCases: missingPersons.length,
-      activeMissingCases: missingPersons.filter(p => p.status === 'missing').length,
-      totalFoundCases: foundPersons.length,
-      unclaimedFoundCases: foundPersons.filter(p => !p.claimed).length,
-      reunited: missingPersons.filter(p => p.status === 'reunited').length,
-      totalTips: missingPersons.reduce((sum, p) => sum + p.tips.length, 0),
-      recentCases: [
-        ...missingPersons.slice(-5).map(p => ({ ...p, type: 'missing' })),
-        ...foundPersons.slice(-5).map(p => ({ ...p, type: 'found' }))
-      ].sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt)).slice(0, 10)
-    };
+    const [
+      totalMissing,
+      totalFound,
+      activeMissing,
+      activeFound,
+      resolved
+    ] = await Promise.all([
+      LostFound.countDocuments({ type: 'missing' }),
+      LostFound.countDocuments({ type: 'found' }),
+      LostFound.countDocuments({ type: 'missing', status: 'active' }),
+      LostFound.countDocuments({ type: 'found', status: 'active' }),
+      LostFound.countDocuments({ status: 'resolved' })
+    ]);
 
     res.json({
       success: true,
-      data: stats
+      data: {
+        totalMissing,
+        totalFound,
+        activeMissing,
+        activeFound,
+        resolved
+      }
     });
   } catch (error) {
+    console.error('Error fetching statistics:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching statistics',
@@ -439,80 +304,95 @@ router.get('/stats', (req, res) => {
   }
 });
 
-// Helper function to find potential matches
-function findPotentialMatches(missingCase) {
-  return foundPersons.filter(found => {
-    if (found.claimed) return false;
+// Helper functions
+async function findPotentialMatches(missingCase) {
+  try {
+    const foundPersons = await LostFound.find({
+      type: 'found',
+      status: 'active',
+      gender: missingCase.gender
+    }).limit(10);
+
+    const matches = [];
     
-    let matchScore = 0;
-    
-    // Gender match
-    if (found.gender.toLowerCase() === missingCase.gender.toLowerCase()) {
-      matchScore += 30;
+    for (const found of foundPersons) {
+      let score = 0;
+      
+      if (found.approximateAge && missingCase.age) {
+        const ageRange = parseInt(found.approximateAge.match(/\d+/)?.[0] || 0);
+        if (Math.abs(ageRange - missingCase.age) <= 5) score += 30;
+      }
+      
+      if (found.clothingDescription && missingCase.clothingDescription) {
+        const clothingWords = missingCase.clothingDescription.toLowerCase().split(' ');
+        const foundClothing = found.clothingDescription.toLowerCase();
+        clothingWords.forEach(word => {
+          if (foundClothing.includes(word)) score += 20;
+        });
+      }
+      
+      if (found.currentLocation && missingCase.lastSeenLocation) {
+        if (found.currentLocation.toLowerCase().includes(missingCase.lastSeenLocation.toLowerCase()) ||
+            missingCase.lastSeenLocation.toLowerCase().includes(found.currentLocation.toLowerCase())) {
+          score += 40;
+        }
+      }
+      
+      if (score >= 40) {
+        matches.push({ ...found.toObject(), matchScore: score });
+      }
     }
     
-    // Age proximity (within 5 years)
-    if (Math.abs(parseInt(found.approximateAge) - parseInt(missingCase.age)) <= 5) {
-      matchScore += 20;
-    }
-    
-    // Location proximity (simple string matching)
-    if (found.currentLocation.toLowerCase().includes(missingCase.lastSeenLocation.toLowerCase()) ||
-        missingCase.lastSeenLocation.toLowerCase().includes(found.currentLocation.toLowerCase())) {
-      matchScore += 30;
-    }
-    
-    // Clothing description similarity
-    if (found.clothingDescription && missingCase.clothingDescription) {
-      const foundClothing = found.clothingDescription.toLowerCase();
-      const missingClothing = missingCase.clothingDescription.toLowerCase();
-      const commonWords = foundClothing.split(' ').filter(word => 
-        missingClothing.includes(word) && word.length > 3
-      );
-      matchScore += commonWords.length * 5;
-    }
-    
-    return matchScore >= 40; // Return matches with score >= 40%
-  }).map(found => ({
-    ...found,
-    matchType: 'found-person'
-  }));
+    return matches.sort((a, b) => b.matchScore - a.matchScore);
+  } catch (error) {
+    console.error('Error finding matches:', error);
+    return [];
+  }
 }
 
-// Helper function to find matches for found persons
-function findMatchesForFound(foundCase) {
-  return missingPersons.filter(missing => {
-    if (missing.status !== 'missing') return false;
+async function findPotentialMatchesForFound(foundCase) {
+  try {
+    const missingPersons = await LostFound.find({
+      type: 'missing',
+      status: 'active',
+      gender: foundCase.gender
+    }).limit(10);
+
+    const matches = [];
     
-    let matchScore = 0;
-    
-    if (foundCase.gender.toLowerCase() === missing.gender.toLowerCase()) {
-      matchScore += 30;
+    for (const missing of missingPersons) {
+      let score = 0;
+      
+      if (foundCase.approximateAge && missing.age) {
+        const ageRange = parseInt(foundCase.approximateAge.match(/\d+/)?.[0] || 0);
+        if (Math.abs(ageRange - missing.age) <= 5) score += 30;
+      }
+      
+      if (foundCase.clothingDescription && missing.clothingDescription) {
+        const clothingWords = missing.clothingDescription.toLowerCase().split(' ');
+        const foundClothing = foundCase.clothingDescription.toLowerCase();
+        clothingWords.forEach(word => {
+          if (foundClothing.includes(word)) score += 20;
+        });
+      }
+      
+      if (foundCase.currentLocation && missing.lastSeenLocation) {
+        if (foundCase.currentLocation.toLowerCase().includes(missing.lastSeenLocation.toLowerCase()) ||
+            missing.lastSeenLocation.toLowerCase().includes(foundCase.currentLocation.toLowerCase())) {
+          score += 40;
+        }
+      }
+      
+      if (score >= 40) {
+        matches.push({ ...missing.toObject(), matchScore: score });
+      }
     }
     
-    if (Math.abs(parseInt(foundCase.approximateAge) - parseInt(missing.age)) <= 5) {
-      matchScore += 20;
-    }
-    
-    if (foundCase.currentLocation.toLowerCase().includes(missing.lastSeenLocation.toLowerCase()) ||
-        missing.lastSeenLocation.toLowerCase().includes(foundCase.currentLocation.toLowerCase())) {
-      matchScore += 30;
-    }
-    
-    if (foundCase.clothingDescription && missing.clothingDescription) {
-      const foundClothing = foundCase.clothingDescription.toLowerCase();
-      const missingClothing = missing.clothingDescription.toLowerCase();
-      const commonWords = foundClothing.split(' ').filter(word => 
-        missingClothing.includes(word) && word.length > 3
-      );
-      matchScore += commonWords.length * 5;
-    }
-    
-    return matchScore >= 40;
-  }).map(missing => ({
-    ...missing,
-    matchType: 'missing-person'
-  }));
+    return matches.sort((a, b) => b.matchScore - a.matchScore);
+  } catch (error) {
+    console.error('Error finding matches:', error);
+    return [];
+  }
 }
 
 module.exports = router;

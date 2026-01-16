@@ -53,7 +53,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-300 mt-8 pt-8 text-center">
           <p className="text-gray-600">
-            Made with <FaHeart className="inline text-red-500" /> for {t('hero.mainTitle')} 2025
+            Made with <FaHeart className="inline text-red-500" /> for {t('hero.mainTitle')} 2027
           </p>
           <p className="text-gray-500 text-sm mt-2">
             © 2026 {t('hero.mainTitle')} {t('hero.mainSubtitle')}. {t('footer.rights')}.

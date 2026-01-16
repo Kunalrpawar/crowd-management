@@ -3,6 +3,10 @@ const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 require('dotenv').config();
+const connectDB = require('./config/database');
+
+// Connect to MongoDB
+connectDB();
 
 const app = express();
 const server = http.createServer(app);
@@ -18,6 +22,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use('/api/users', require('./routes/users'));
 app.use('/api/crowd', require('./routes/crowd'));
 app.use('/api/routes', require('./routes/routes'));
 app.use('/api/alerts', require('./routes/alerts'));
@@ -27,6 +32,8 @@ app.use('/api/lostfound', require('./routes/lostfound'));
 app.use('/api/medical', require('./routes/medical'));
 app.use('/api/weather', require('./routes/weather'));
 app.use('/api/track-nashik', require('./routes/track-nashik'));
+app.use('/api/parking', require('./routes/parking'));
+app.use('/api/incidents', require('./routes/incidents'));
 
 // Health check
 app.get('/api/health', (req, res) => {
